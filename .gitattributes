@@ -1,0 +1,16 @@
+# Use LF in source/text files, CRLF for Windows-only scripts.
+* text=auto eol=lf
+
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binary assets
+*.xex   binary
+*.iso   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.dds   binary
+*.xpr   binary
+*.bin   binary

@@ -1,0 +1,33 @@
+# ReXGlue project manifest for Dante's Inferno (Xbox 360 -> PC port).
+#
+# This file is SDK-managed. It was scaffolded manually to match the output of
+# `rexglue init` (v0.10.0) and should be regenerated with `--force` once the
+# entrypoint XEX is available so the SDK can stamp the exact version/build info:
+#
+#   rexglue init --force \
+#       --project_name dantes_inferno \
+#       --project_root . \
+#       --xex_path game/default.xex \
+#       --game_root game
+#
+# NOTE: `rexglue init` requires the entrypoint XEX to be present on disk.
+
+[project]
+name = "dantes_inferno"
+sdk_version = "0.10.0"
+game_root = "game"
+
+[entrypoint]
+# Path to the Xbox 360 entrypoint XEX (relative to the project root).
+# Extract default.xex from the game ISO and place it under game/.
+file_path = "game/default.xex"
+out_directory_path = "generated/default"
+includes = []
+
+# Additional guest DLL modules are appended here by `rexglue init module`
+# or by `rexglue init --scan_dlls` once the game files are in place:
+# [[modules]]
+# guest_path = "game:\\game\\some.dll"
+# file_path = "game/some.dll"
+# out_directory_path = "generated/some"
+# includes = []

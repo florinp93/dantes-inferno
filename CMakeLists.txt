@@ -21,4 +21,10 @@ else()
     add_executable(dantes_inferno ${DANTESINFERNO_SOURCES})
 endif()
 
-rexglue_setup_target(dantes_inferno)
+# rexruntime pulls rexui in as PRIVATE, so the imgui headers don't reach the
+# host target. Link rex::ui directly to get its PUBLIC include directories.
+if(TARGET rex::ui)
+    target_link_libraries(dantes_inferno PRIVATE rex::ui)
+endif()
+
+rexglue_setup_target(dantes_inferno GPU_PLUGINS xenos)

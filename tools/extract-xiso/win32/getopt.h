@@ -1,0 +1,6 @@
+#ifndef GETOPT_H
+#define GETOPT_H
+extern char *optarg;
+extern int optind;
+int getopt(int argc, char *const *argv, const char *optstr);
+#endif

@@ -19,6 +19,13 @@ generated/*/*.hpp
 # --- ReXGlue SDK (cloned via setup script, not tracked here) ---
 thirdparty/rexglue-sdk/
 
+# --- Disc images (copyrighted, do NOT commit) ---
+disc/
+*.iso
+*.xiso
+*.god
+*.ciso
+
 # --- Game assets (copyrighted, extracted from ISO; do NOT commit) ---
 game/*
 !game/.gitkeep

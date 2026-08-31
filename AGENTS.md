@@ -54,11 +54,40 @@ Run: `out\win-amd64\Release\dantes_inferno.exe`
 Project name `dantes_inferno` -> snake_case `dantes_inferno`, PascalCase
 `DantesInferno`, UPPER `DANTESINFERNO`. CMake target: `dantes_inferno`.
 
+## Improvement plan
+
+See `docs/improvements_plan.md` for full research findings. Summary:
+
+1. **Graphics quality** (Phase 1, no RE): resolution_scale, anisotropic_override,
+   swap_post_effect=fxaa cvars in OnPreSetup. Optionally FidelityFX FSR build.
+2. **Input config** (Phase 2, no RE): SDL backend + MnK keybind defaults in
+   OnPreSetup. DualShock/DualSense/Xbox all supported via SDL3.
+3. **DLC auto-install** (Phase 3, no RE): OnPostSetup hook scans dlc/ folder,
+   calls ContentManager::InstallContent() on each STFS package.
+4. **Ultrawide** (Phase 4, requires RE): midasm_hook on projection matrix to
+   patch aspect ratio. Hor+ anamorphic render strategy.
+5. **Button glyphs** (Phase 5, requires RE): replace game's button prompt
+   textures based on active input device. Needs SDK patch for device detection
+   or glyph_family cvar. Glyph art in metadata/glyphs/.
+6. **Installer** (Phase 6): asks user for ISO + DLC folder, extracts to game/
+   and dlc/. No STFS logic in installer.
+
+Known blocker: ReXGlue issue #75 — Dante's Inferno crashes at startup due to
+unimplemented VMX/Altivec PPC instructions (v0.1.1). Check if v0.10.0 resolved.
+
 ## Current status
 
 - [x] SDK cloned at v0.10.0 (submodules NOT yet initialized - run `setup.ps1`)
 - [x] Project scaffolding created from ReXGlue v0.10.0 init templates
+- [x] GitHub repo created: https://github.com/florinp93/dantes-inferno (private)
+- [x] Game ISO + DLC file placed in disc/ (ISO 7.8GB, DLC is STFS LIVE package)
+- [x] Improvement research completed (docs/improvements_plan.md)
 - [ ] SDK submodules initialized & CLI built
 - [ ] Game ISO extracted into `game/` with `default.xex` entrypoint
 - [ ] `rexglue init --force` run to stamp SDK-managed files
-- [ ] First successful codegen + build
+- [ ] First successful codegen + build (may hit VMX/Altivec issue #75)
+- [ ] Graphics quality cvars configured in OnPreSetup
+- [ ] MnK keybind defaults configured in OnPreSetup
+- [ ] DLC auto-install hook in OnPostSetup
+- [ ] Ultrawide projection hook (requires RE of generated code)
+- [ ] Button glyph replacement (requires RE of generated code)

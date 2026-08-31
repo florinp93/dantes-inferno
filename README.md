@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Dante's Inferno - PC Recomp Project" width="100%" />
+</p>
+
 # Dante's Inferno - Xbox 360 to PC Port (ReXGlue)
 
 A static recompilation port of **Dante's Inferno** (Xbox 360) to native PC,

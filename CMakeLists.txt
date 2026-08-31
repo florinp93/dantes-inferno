@@ -21,8 +21,8 @@ else()
     add_executable(dantes_inferno ${DANTESINFERNO_SOURCES})
 endif()
 
-# rexruntime pulls rexui in as PRIVATE, so the imgui headers don't reach the
-# host target. Link rex::ui directly to get its PUBLIC include directories.
+# rexruntime links rexui privately, so ImGui include paths don't reach the
+# host target. Link rex::ui directly to get them.
 if(TARGET rex::ui)
     target_link_libraries(dantes_inferno PRIVATE rex::ui)
 endif()

@@ -19,6 +19,12 @@ class DantesInfernoApp : public rex::ReXApp {
   }
 
   void OnPreSetup(rex::RuntimeConfig& config) override {
+    // --- GPU plugin ---
+    // Load the Xenos GPU emulation plugin (built as rexgpu-xenos.dll).
+    // Without this, all Vd* graphics calls are no-ops and the game can't
+    // render anything.
+    config.gpu_plugin = "xenos";
+
     // --- Input configuration ---
     //
     // ReXGlue v0.10.0 ships three input drivers that coexist:

@@ -51,7 +51,7 @@ scaffolding; the ReXGlue SDK itself lives under `thirdparty/`.
 ## Prerequisites
 
 - **Windows 10/11 x64** (this project targets Windows/D3D12)
-- **Clang 18+** (LLVM/Clang) - already detected: Clang 22
+- **Clang 18+** (LLVM/Clang)
 - **CMake 3.25+**
 - **Ninja** build system
 - **Visual Studio 2022** (for the Windows SDK / D3D12 headers)

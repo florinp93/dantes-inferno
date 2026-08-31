@@ -2,6 +2,18 @@
   <img src="assets/banner.png" alt="Dante's Inferno - PC Recomp Project" width="100%" />
 </p>
 
+<p align="center">
+  <a href="#">
+    <img src="https://img.shields.io/badge/Patreon-Become%20a%20Patron-FF424D?style=for-the-badge&logo=patreon&logoColor=white" alt="Patreon" />
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Ko--Fi-Buy%20me%20a%20coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Other-Projects-0AB4F5?style=for-the-badge&logo=github&logoColor=white" alt="Other Projects" />
+  </a>
+</p>
+
 # Dante's Inferno - Xbox 360 to PC Port (ReXGlue)
 
 A static recompilation port of **Dante's Inferno** (Xbox 360) to native PC,

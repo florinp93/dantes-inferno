@@ -22,14 +22,19 @@ codegen to have run first.
 | Camera | Automatic/scripted (no manual control) | Official manual |
 | Official PC release | Never | - |
 | Existing RE tools | Gibbed.Visceral (source-only, incomplete) | GitHub |
-| ReXGlue status | Issue #75: crashes at startup (unimplemented VMX/Altivec) | GitHub |
+| ReXGlue status | v0.10.0: boots, VMX bugs fixed (PR #426) | GitHub |
 
-### Known blocker: VMX/Altivec instructions
-ReXGlue issue #75 reports Dante's Inferno crashes at startup due to unimplemented
+### Known blocker: VMX/Altivec instructions — RESOLVED
+~~ReXGlue issue #75 reports Dante's Inferno crashes at startup due to unimplemented
 PPC instructions: `vcmpgtuw`, `vminsw`, `vadduhs`, `lbzux`, `lhaux`, `stbux`,
 `stdux`, `stfsux`. These must be resolved (either in the SDK or via patches)
 before the recompiled build boots. Check if v0.10.0 has addressed these since
-the issue was filed against v0.1.1.
+the issue was filed against v0.1.1.~~
+
+**Status:** Resolved. v0.10.0 has full VMX/AltiVec support. The game boots and
+runs. Three VMX instruction builder bugs were found and fixed that caused
+VP6/Bink FMV corruption — see `docs/vp6_fmv_corruption_fix.md` and upstream
+PR [rexglue/rexglue-sdk#426](https://github.com/rexglue/rexglue-sdk/pull/426).
 
 ### DLC (Title ID 454108CF)
 - Dark Forest (prequel level)
@@ -432,14 +437,16 @@ config/
 ## 4. Implementation Priority & Dependencies
 
 ```
-Phase 0: Get the game booting
-  └─ Extract ISO → game/default.xex
-  └─ Run setup.ps1 (init SDK submodules)
-  └─ Build rexglue CLI
-  └─ rexglue init --force
-  └─ Build & run (resolve VMX/Altivec issue #75 if still present)
+Phase 0: Get the game booting — COMPLETE
+  ✓ Extract ISO → game/default.xex
+  ✓ Run setup.ps1 (init SDK submodules)
+  ✓ Build rexglue CLI
+  ✓ rexglue init --force
+  ✓ Build & run — VMX/Altivec issue #75 resolved in v0.10.0
+  ✓ VP6 FMV corruption fixed (vpkuwus aliasing, vmsum3fp128 mask, pack unpackhi)
+  ✓ SDK patches submitted upstream as PR #426
 
-Phase 1: Graphics quality (lowest effort, highest impact)
+Phase 1: Graphics quality (lowest effort, highest impact) — NEXT
   └─ Set resolution_scale, anisotropic_override, swap_post_effect in OnPreSetup
   └─ Optionally build with FidelityFX for FSR output upscaling
   └─ No RE required — pure cvar configuration

@@ -25,6 +25,17 @@ class DantesInfernoApp : public rex::ReXApp {
     // render anything.
     config.gpu_plugin = "xenos";
 
+    // --- Render target path ---
+    // Use pixel-shader interlock (rasterizer-ordered views) instead of host
+    // render targets. The host-RT (RTV/DSV) path corrupts pre-rendered VP6 FMV
+    // video because the EDRAM resolve + frontbuffer dump doesn't correctly
+    // handle the video render target's format and lifecycle (the RT gets
+    // evicted from the host RT cache after ~20 frames, and the _AS_16_16_16_16
+    // format is loaded with the wrong stride). The ROV path writes directly to
+    // the EDRAM buffer, matching the working Vulkan fragment-shader-interlock
+    // path. This is the same issue documented in TheSimpsonsGameRecomp #15.
+    rex::cvar::SetFlagByName("render_target_path_d3d12", "rov");
+
     // --- Input configuration ---
     //
     // ReXGlue v0.10.0 ships three input drivers that coexist:

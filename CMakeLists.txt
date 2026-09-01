@@ -8,6 +8,11 @@ project(dantes_inferno LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Ensure SSE4.1 (implies SSSE3) for all targets including SDK libraries
+if(NOT MSVC AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+    add_compile_options(-mssse3 -msse4.1)
+endif()
+
 include(generated/rexglue.cmake)
 
 # Sources
@@ -21,10 +26,10 @@ else()
     add_executable(dantes_inferno ${DANTESINFERNO_SOURCES})
 endif()
 
-# rexruntime links rexui privately, so ImGui include paths don't reach the
-# host target. Link rex::ui directly to get them.
-if(TARGET rex::ui)
-    target_link_libraries(dantes_inferno PRIVATE rex::ui)
-endif()
+rexglue_setup_target(dantes_inferno)
 
-rexglue_setup_target(dantes_inferno GPU_PLUGINS xenos)
+# rexruntime links rexui/imgui PRIVATE, but rex/rex_app.h includes rex/ui/*
+# which requires imgui's include directory. Add it directly.
+target_include_directories(dantes_inferno PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rexglue-sdk/thirdparty/imgui"
+)

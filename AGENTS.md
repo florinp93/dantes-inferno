@@ -72,20 +72,56 @@ See `docs/improvements_plan.md` for full research findings. Summary:
 6. **Installer** (Phase 6): asks user for ISO + DLC folder, extracts to game/
    and dlc/. No STFS logic in installer.
 
-Known blocker: ReXGlue issue #75 — Dante's Inferno crashes at startup due to
-unimplemented VMX/Altivec PPC instructions (v0.1.1). Check if v0.10.0 resolved.
+~~Known blocker: ReXGlue issue #75 — Dante's Inferno crashes at startup due to
+unimplemented VMX/Altivec PPC instructions (v0.1.1).~~ **Resolved in v0.10.0.**
+Game boots and runs. VMX builder bugs causing FMV corruption were found and
+fixed (see `docs/vp6_fmv_corruption_fix.md`).
+
+## SDK patches
+
+The SDK under `thirdparty/rexglue-sdk/` has local patches to
+`src/codegen/builders/vector.cpp` that fix three VMX instruction builder bugs.
+These fixes are submitted upstream as
+[rexglue/rexglue-sdk#426](https://github.com/rexglue/rexglue-sdk/pull/426).
+Full technical documentation: `docs/vp6_fmv_corruption_fix.md`.
+
+If the SDK is re-cloned, these patches must be re-applied. The fixes are:
+
+1. **`vpkuwus` / `vpkuhus` in-place aliasing** (root cause of FMV corruption):
+   Element-by-element packing loops aliased the destination's narrowed array
+   with the source's wider array. Replaced with SSE intrinsics.
+2. **`vmsum3fp128` dot product mask** (`0xEF` → `0x7F`): Wrong broadcast
+   pattern in the SSE `dp_ps` imm8 mask.
+3. **Pack builder `unpackhi_epi64` removal**: Pack builders discarded half
+   the packed elements via `unpackhi_epi64`. Removed and operand-swapped for
+   byte reversal.
+
+## Build & run notes
+
+- The executable loads `rexgpu-xenos.dll` from its own directory, not from
+  the SDK output. After rebuilding the SDK, copy:
+  `thirdparty\rexglue-sdk\out\win-amd64\rexgpu-xenos.dll` →
+  `out\build\win-amd64-release\rexgpu-xenos.dll`
+- Always launch with `--game_data_root=game` from the project root.
+- Runtime logs are in `out\build\win-amd64-release\logs\`.
+- After changing SDK codegen builders, delete the stale generated files to
+  force regeneration:
+  `Remove-Item generated\default\dantes_inferno_recomp.{7,95,23,94}.cpp -Force`
 
 ## Current status
 
-- [x] SDK cloned at v0.10.0 (submodules NOT yet initialized - run `setup.ps1`)
+- [x] SDK cloned at v0.10.0
 - [x] Project scaffolding created from ReXGlue v0.10.0 init templates
 - [x] GitHub repo created: https://github.com/florinp93/dantes-inferno (private)
 - [x] Game ISO + DLC file placed in disc/ (ISO 7.8GB, DLC is STFS LIVE package)
 - [x] Improvement research completed (docs/improvements_plan.md)
-- [ ] SDK submodules initialized & CLI built
-- [ ] Game ISO extracted into `game/` with `default.xex` entrypoint
-- [ ] `rexglue init --force` run to stamp SDK-managed files
-- [ ] First successful codegen + build (may hit VMX/Altivec issue #75)
+- [x] SDK submodules initialized & CLI built
+- [x] Game ISO extracted into `game/` with `default.xex` entrypoint
+- [x] `rexglue init --force` run to stamp SDK-managed files
+- [x] First successful codegen + build
+- [x] VMX/AltiVec issue #75 resolved (v0.10.0 has full VMX support)
+- [x] VP6/Bink FMV corruption diagnosed and fixed (docs/vp6_fmv_corruption_fix.md)
+- [x] SDK patches submitted upstream (PR #426)
 - [ ] Graphics quality cvars configured in OnPreSetup
 - [ ] MnK keybind defaults configured in OnPreSetup
 - [ ] DLC auto-install hook in OnPostSetup

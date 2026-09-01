@@ -81,7 +81,7 @@ from runtime logs:
 
 ## Fixes Applied
 
-### Fix 1: `vmsum3fp128` Dot Product Mask (0xEF → 0x7F)
+### Fix 1: `vmsum3fp128` Dot Product Mask — REVERTED (0x7F → 0xEF)
 
 **File:** `thirdparty/rexglue-sdk/src/codegen/builders/vector.cpp`
 **Function:** `build_vmsum3fp128`
@@ -90,12 +90,13 @@ from runtime logs:
 
 `vmsum3fp128` computes a 3-element floating-point dot product (PPC elements
 0, 1, 2 — excluding element 3). The implementation uses SSE
-`simde_mm_dp_ps` (dot product) with an 8-bit imm8 mask that selects which
-elements to multiply, sum, and broadcast.
+`simde_mm_dp_ps` (dot product) with an 8-bit imm8 mask.
 
-The SSE `dp_ps` mask format is:
-- Bits [7:4] — broadcast mask (which output lanes receive the result)
-- Bits [3:0] — multiply/sum mask (which input elements participate)
+The SSE `dp_ps` mask format (per Intel SDM and SIMDE implementation) is:
+- **Bits [7:4] — source/sum mask**: bit `(i+4)` selects host element `i`
+  - bit 4 → host elem 0, bit 5 → host elem 1,
+  - bit 6 → host elem 2, bit 7 → host elem 3
+- **Bits [3:0] — destination/broadcast mask**: bit `i` selects host element `i`
 
 Due to the PPC-to-host byte reversal:
 - PPC element 0 = host element 3
@@ -103,25 +104,45 @@ Due to the PPC-to-host byte reversal:
 - PPC element 2 = host element 1
 - PPC element 3 = host element 0 (excluded from 3-element dot)
 
-To select PPC elements 0,1,2 = host elements 3,2,1, the sum mask bits must
-be `111` = `0x7`, and the broadcast must go to all 4 lanes = `0xF`.
+To sum PPC elements 0,1,2 = host elements 3,2,1 and exclude PPC element 3 =
+host element 0:
+- Sum bits [7:4] = `1110` = `0xE` (bit 4=0 excludes host elem 0 = PPC elem 3)
+- Broadcast bits [3:0] = `1111` = `0xF` (all lanes)
+- **Correct mask: `0xEF`**
 
-**Correct mask:** `0x7F` (sum host elements 3,2,1; broadcast to all lanes)
+#### History — Incorrect "Fix" and Reversion
 
-**Incorrect mask:** `0xEF` (sum host elements 3,2,1 — same sum bits, but
-broadcast only to host element 3 = PPC element 0)
+An earlier iteration of this document incorrectly described the mask layout
+as bits [7:4] = broadcast and [3:0] = sum (reversed from the actual Intel
+convention). Based on that incorrect understanding, the mask was changed
+from `0xEF` to `0x7F`. This was **wrong**:
 
-The difference is the broadcast pattern. With `0xEF`, only PPC element 0
-receives the dot product result; elements 1-3 are zero. With `0x7F`, all
-four elements receive the result, matching PPC `vmsum3fp128` semantics.
+- `0x7F` = `0b0111_1111`: sum bits [7:4] = `0111` → sums host elements
+  0,1,2 (PPC elements 3,2,1) and **EXCLUDES host element 3 = PPC element 0
+  (the X component)**. This broke 3-element dot products in physics/collision
+  code, causing the character to fall through the map after the opening
+  cutscene.
+- `0xEF` = `0b1110_1111`: sum bits [7:4] = `1110` → sums host elements
+  1,2,3 (PPC elements 2,1,0) and excludes host element 0 = PPC element 3 (W).
+  This is correct.
 
-#### Generated Code (After Fix)
+The FMV corruption was actually fixed by Fix 2 (pack builder `unpackhi`
+removal) and Fix 3 (`vpkuwus`/`vpkuhus` aliasing), not by the `vmsum3fp128`
+mask change. The mask change was a red herring that introduced a new,
+severe physics bug.
+
+The `0x7F` → `0xEF` reversion was verified by the SDK's PPC instruction
+test suite (`ppc_tests`): the `vmsum3fp128.test_1` test case failed with
+`0x7F` (expected `0x4122A7F0`, got `0x4102A7F0` — missing the PPC element 0
+product) and passes with `0xEF`. All 1458 test cases pass after the fix.
+
+#### Generated Code (After Reversion)
 
 ```cpp
 // vmsum3fp128 v8,v10,v10
 simde_mm_store_ps(ctx.v8.f32,
                   simde_mm_dp_ps(simde_mm_load_ps(ctx.v10.f32),
-                                 simde_mm_load_ps(ctx.v10.f32), 0x7F));
+                                 simde_mm_load_ps(ctx.v10.f32), 0xEF));
 ```
 
 ### Fix 2: Pack Builder `unpackhi_epi64` Removal

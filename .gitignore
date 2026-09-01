@@ -56,3 +56,21 @@ $RECYCLE.BIN/
 *.lib
 *.exe
 *.dll
+
+# --- Debug dumps / temp artifacts ---
+build_output.txt
+run_output.txt
+default.idc
+default_basefile.bin
+sdk_texture_cache_diff*.txt
+vp6_luma_guest_ram_*.raw
+vp6_luma_guest_ram_*.png
+vp6_pixel_shader_dxbc.txt
+xextool_v6.6.zip
+xextool_v6.6/
+test/minidumps/
+test/run_*.log
+test/headless_test_run.log
+tools/__pycache__/
+__pycache__/
+*.pyc

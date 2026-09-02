@@ -144,6 +144,15 @@ namespace DantesInferno
     {
         private const string ApiUrl = "https://api.github.com/repos/florinp93/dantes-inferno/releases";
 
+        static GitHubUpdater()
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            }
+            catch { }
+        }
+
         public static ReleaseInfo CheckLatest(string token = null)
         {
             using (var client = new WebClient())

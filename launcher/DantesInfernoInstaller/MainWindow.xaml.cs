@@ -133,7 +133,7 @@ namespace DantesInferno.Installer
             Step5Finish.Visibility = _step == 5 ? Visibility.Visible : Visibility.Collapsed;
 
             BackButton.IsEnabled = _step > 1 && _step < 5;
-            NextButton.IsEnabled = _step < 5;
+            NextButton.IsEnabled = _step != 4;
             NextButton.Content = _step == 3 ? "Install" : (_step == 5 ? "Finish" : "Next");
         }
 
@@ -166,6 +166,7 @@ namespace DantesInferno.Installer
 
                 _step = 4;
                 UpdateNavigation();
+                InstallProgress.IsIndeterminate = true;
                 _worker.RunWorkerAsync();
                 return;
             }
@@ -220,7 +221,7 @@ namespace DantesInferno.Installer
                     Directory.Delete(gameDir, true);
                 }
 
-                _worker.ReportProgress(10, "Extracting ISO to game folder...");
+                _worker.ReportProgress(10, "Extracting ISO to game folder (this may take a few minutes)...");
                 string extractExe = GetPayloadFile("extract-xiso.exe");
                 if (!File.Exists(extractExe))
                     throw new FileNotFoundException("extract-xiso.exe was not found in the installer payload.");
@@ -228,7 +229,7 @@ namespace DantesInferno.Installer
                 var psi = new ProcessStartInfo
                 {
                     FileName = extractExe,
-                    Arguments = $"-x -d \"{gameDir}\" -s -q \"{_isoPath}\"",
+                    Arguments = $"-x -d \"{gameDir}\" -s \"{_isoPath}\"",
                     WorkingDirectory = _destination,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -238,8 +239,8 @@ namespace DantesInferno.Installer
 
                 using (var process = Process.Start(psi))
                 {
-                    process.OutputDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, ev.Data); };
-                    process.ErrorDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, ev.Data); };
+                    process.OutputDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "FILE:" + ev.Data); };
+                    process.ErrorDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "ERR:" + ev.Data); };
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
                     process.WaitForExit();
@@ -294,13 +295,37 @@ namespace DantesInferno.Installer
 
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            InstallProgress.Value = e.ProgressPercentage;
-            LogTextBox.AppendText((e.UserState as string) + "\n");
+            if (e.ProgressPercentage > 0)
+            {
+                InstallProgress.IsIndeterminate = false;
+                InstallProgress.Value = e.ProgressPercentage;
+            }
+
+            string message = e.UserState as string;
+            if (string.IsNullOrEmpty(message))
+                return;
+
+            if (message.StartsWith("FILE:"))
+            {
+                CurrentOperationText.Text = message.Substring(5);
+                return;
+            }
+
+            if (message.StartsWith("ERR:"))
+            {
+                LogTextBox.AppendText(message.Substring(4) + "\n");
+                LogTextBox.ScrollToEnd();
+                return;
+            }
+
+            LogTextBox.AppendText(message + "\n");
             LogTextBox.ScrollToEnd();
         }
 
         private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            InstallProgress.IsIndeterminate = false;
+
             if (e.Result is Exception ex)
             {
                 MessageBox.Show("Installation failed:\n" + ex.Message, "Install Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -309,6 +334,7 @@ namespace DantesInferno.Installer
                 return;
             }
 
+            InstallProgress.Value = 100;
             _step = 5;
             FinishSummary.Text = $"Installed to:\n{_destination}\n\nGame data extracted to:\n{Path.Combine(_destination, "game")}\n\nClick Finish to close the installer.";
             UpdateNavigation();
@@ -322,6 +348,9 @@ namespace DantesInferno.Installer
                 string shortcutPath = Path.Combine(desktop, "Dante's Inferno.lnk");
                 string target = Path.Combine(_destination, "DantesInfernoLauncher.exe");
                 string icon = Path.Combine(_destination, "DantesInfernoLauncher.exe");
+
+                if (File.Exists(shortcutPath))
+                    File.Delete(shortcutPath);
 
                 dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));
                 dynamic shortcut = shell.CreateShortcut(shortcutPath);

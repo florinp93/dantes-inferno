@@ -56,7 +56,8 @@
             <StackPanel x:Name="Step4Progress" Visibility="Collapsed">
                 <TextBlock Text="Installing..." FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
                 <ProgressBar x:Name="InstallProgress" Minimum="0" Maximum="100" Value="0" Margin="0,10" />
-                <TextBox x:Name="LogTextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Height="220" Background="{StaticResource BackgroundPanel}" Foreground="{StaticResource TextBrush}" BorderBrush="{StaticResource BorderBrush}" Padding="10" FontFamily="Consolas" FontSize="12" />
+                <TextBlock x:Name="CurrentOperationText" Text="" FontSize="12" Opacity="0.8" Margin="0,0,0,5" />
+                <TextBox x:Name="LogTextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Height="200" Background="{StaticResource BackgroundPanel}" Foreground="{StaticResource TextBrush}" BorderBrush="{StaticResource BorderBrush}" Padding="10" FontFamily="Consolas" FontSize="12" />
             </StackPanel>
 
             <StackPanel x:Name="Step5Finish" Visibility="Collapsed">

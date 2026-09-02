@@ -195,6 +195,11 @@ namespace DantesInferno.Launcher
             var args = new List<string>();
             args.Add(string.Format("--game_data_root=\"{0}\"", gameData));
 
+            // Use ROV (rasterizer-ordered views) for correct alpha/transparency
+            // rendering. The host RTV path has known issues with alpha-blended
+            // models (e.g. invisible characters).
+            args.Add("--render_target_path_d3d12=rov");
+
             // Resolution scale
             int scale = _config.ResolutionScale;
             if (scale > 1)
@@ -209,8 +214,17 @@ namespace DantesInferno.Launcher
                 args.Add(string.Format("--anisotropic_override={0}", _config.AnisotropicOverride));
 
             // VSync / frame rate
-            if (!_config.VSync)
+            if (_config.VSync)
+            {
+                args.Add("--vsync=true");
+                args.Add("--d3d12_host_vsync=true");
+                args.Add(string.Format("--video_mode_refresh_rate={0}", _config.VideoModeRefreshRate));
+            }
+            else
+            {
                 args.Add("--vsync=false");
+                args.Add("--d3d12_host_vsync=false");
+            }
 
             // Input
             if (_config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase))

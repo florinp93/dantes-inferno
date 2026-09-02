@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -13,6 +14,7 @@ namespace DantesInferno.Launcher
     {
         private GameConfig _config;
         private string _installDir;
+        private bool _gameRunning;
 
         public MainWindow()
         {
@@ -68,7 +70,7 @@ namespace DantesInferno.Launcher
                 case "none": AAModeCombo.SelectedIndex = 0; break;
                 case "fxaa": AAModeCombo.SelectedIndex = 1; break;
                 case "fxaa_extreme": AAModeCombo.SelectedIndex = 2; break;
-                default: AAModeCombo.SelectedIndex = 2; break;
+                default: AAModeCombo.SelectedIndex = 0; break;
             }
 
             MsaaCheck.IsChecked = _config.Native2xMsaa;
@@ -77,46 +79,9 @@ namespace DantesInferno.Launcher
             ResScaleCombo.ItemsSource = new List<string> { "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x" };
             ResScaleCombo.SelectedIndex = _config.ResolutionScale - 1;
 
-            GameDataTextBox.Text = _config.GameDataRoot;
-
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
             SharpenCheck.IsChecked = _config.AnisotropicOverride == 5 && _config.SwapPostEffect == "fxaa_extreme";
             CommonFixesCheck.IsChecked = _config.RenderTargetPath.Equals("rov", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private void ApplySettingsToConfig()
-        {
-            _config.Resolution = ResolutionCombo.SelectedItem as string ?? "1080p";
-            _config.FrameCap = (FrameCapOption)FrameCapCombo.SelectedIndex;
-            _config.Fullscreen = FullscreenCheck.IsChecked ?? true;
-            _config.Native2xMsaa = MsaaCheck.IsChecked ?? true;
-            _config.ResolutionScale = ResScaleCombo.SelectedIndex + 1;
-            _config.AnisotropicOverride = AnisoCombo.SelectedIndex - 1;
-
-            string aa = AAModeCombo.SelectedIndex == 0 ? "none" : (AAModeCombo.SelectedIndex == 2 ? "fxaa_extreme" : "fxaa");
-            _config.SwapPostEffect = aa;
-
-            _config.GameDataRoot = GameDataTextBox.Text.Trim();
-            _config.InputBackend = (ControllerFixCheck.IsChecked ?? true) ? "sdl" : "xinput";
-            _config.RenderTargetPath = (CommonFixesCheck.IsChecked ?? true) ? "rov" : "";
-
-            if (SharpenCheck.IsChecked ?? false)
-            {
-                _config.AnisotropicOverride = 5;
-                _config.SwapPostEffect = "fxaa_extreme";
-            }
-
-            if (AutoOptimizationsCheck.IsChecked ?? false)
-            {
-                _config.Resolution = "1080p";
-                _config.AnisotropicOverride = 5;
-                _config.SwapPostEffect = "fxaa_extreme";
-                _config.VSync = true;
-                _config.Native2xMsaa = true;
-                _config.Fullscreen = true;
-                _config.RenderTargetPath = "rov";
-                _config.ResolutionScale = 2;
-            }
         }
 
         private void RefreshPlayStatus()
@@ -129,10 +94,29 @@ namespace DantesInferno.Launcher
                 PlayStatusText.Text = "Game files missing. Run the installer first.";
         }
 
+        private void ClearOldLogs()
+        {
+            try
+            {
+                string logsDir = PathHelper.GetLogsPath(_installDir);
+                if (!Directory.Exists(logsDir))
+                    return;
+
+                foreach (var file in Directory.GetFiles(logsDir, "*.log", SearchOption.AllDirectories))
+                {
+                    try { File.Delete(file); } catch { }
+                }
+            }
+            catch { }
+        }
+
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
-            _config.GameDataRoot = GameDataTextBox.Text.Trim();
-            _config.Save();
+            if (_gameRunning)
+            {
+                MessageBox.Show("The game is already running.", "Already Running", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             string exePath = PathHelper.GetGameExecutablePath(_installDir);
             if (!File.Exists(exePath))
@@ -148,27 +132,102 @@ namespace DantesInferno.Launcher
                 return;
             }
 
-            string arguments = string.Format(
-                "--game_data_root=\"{0}\" --render_target_path_d3d12=rov --resolution_scale=2 --anisotropic_override=5 --swap_post_effect=fxaa_extreme --native_2x_msaa=true --vsync=true",
-                gameData);
+            bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
 
+            ClearOldLogs();
+
+            var args = new List<string>();
+            args.Add(string.Format("--game_data_root=\"{0}\"", gameData));
+            args.Add("--render_target_path_d3d12=rov");
+            args.Add(loggingEnabled ? "--log_level=info" : "--log_level=off");
+
+            string arguments = string.Join(" ", args);
             PlayNoteText.Text = "Launch command: dantes_inferno.exe " + arguments;
+            PlayButton.IsEnabled = false;
+            _gameRunning = true;
 
-            var psi = new ProcessStartInfo
+            Task.Factory.StartNew(new Action(() =>
             {
-                FileName = exePath,
-                Arguments = arguments,
-                WorkingDirectory = _installDir,
-                UseShellExecute = false,
-            };
+                int exitCode = -1;
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        Arguments = arguments,
+                        WorkingDirectory = _installDir,
+                        UseShellExecute = false,
+                    };
+
+                    using (var process = Process.Start(psi))
+                    {
+                        process.WaitForExit();
+                        exitCode = process.ExitCode;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        MessageBox.Show("Failed to start the game:\n" + ex.Message, "Launch Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }));
+                }
+
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    _gameRunning = false;
+                    PlayButton.IsEnabled = true;
+
+                    if (exitCode != 0)
+                        ShowCrashDialog(exitCode);
+                }));
+            }));
+        }
+
+        private void ShowCrashDialog(int exitCode)
+        {
+            string logsDir = PathHelper.GetLogsPath(_installDir);
+            string latestLog = null;
 
             try
             {
-                Process.Start(psi);
+                if (Directory.Exists(logsDir))
+                {
+                    var logFile = Directory.GetFiles(logsDir, "*.log", SearchOption.AllDirectories)
+                        .OrderByDescending(f => File.GetLastWriteTime(f))
+                        .FirstOrDefault();
+                    if (logFile != null)
+                        latestLog = logFile;
+                }
             }
-            catch (Exception ex)
+            catch { }
+
+            string message = "Dante's Inferno has crashed (exit code: " + exitCode + ").\n\n";
+            if (latestLog != null)
+                message += "Log file: " + latestLog + "\n\n";
+            else
+                message += "No log file was found in " + logsDir + "\n\n";
+            message += "Please report this on GitHub and attach the log file.\n";
+            message += "https://github.com/florinp93/dantes-inferno/issues\n\n";
+            message += "Click OK to open the log folder and the GitHub issues page.";
+
+            var result = MessageBox.Show(message, "Game Crashed", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+            if (result == MessageBoxResult.OK)
             {
-                MessageBox.Show("Failed to start the game:\n" + ex.Message, "Launch Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                try
+                {
+                    if (Directory.Exists(logsDir))
+                        Process.Start(new ProcessStartInfo("explorer.exe", "\"" + logsDir + "\"") { UseShellExecute = true });
+                    else
+                        Process.Start(new ProcessStartInfo("explorer.exe", "\"" + _installDir + "\"") { UseShellExecute = true });
+                }
+                catch { }
+
+                try
+                {
+                    Process.Start(new ProcessStartInfo("https://github.com/florinp93/dantes-inferno/issues") { UseShellExecute = true });
+                }
+                catch { }
             }
         }
 
@@ -177,30 +236,16 @@ namespace DantesInferno.Launcher
             Close();
         }
 
-        private void BrowseGameData_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog
-            {
-                Description = "Select the folder containing default.xex",
-                SelectedPath = GameDataTextBox.Text
-            };
-            var result = dialog.ShowDialog();
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                GameDataTextBox.Text = dialog.SelectedPath;
-            }
-        }
-
         private void ApplyRecommended_Click(object sender, RoutedEventArgs e)
         {
             _config.Resolution = "1080p";
-            _config.AnisotropicOverride = 5;
-            _config.SwapPostEffect = "fxaa_extreme";
+            _config.AnisotropicOverride = -1;
+            _config.SwapPostEffect = "none";
             _config.VSync = true;
-            _config.Native2xMsaa = true;
+            _config.Native2xMsaa = false;
             _config.Fullscreen = true;
             _config.RenderTargetPath = "rov";
-            _config.ResolutionScale = 2;
+            _config.ResolutionScale = 1;
             _config.InputBackend = "sdl";
             AutoOptimizationsCheck.IsChecked = true;
             PopulateControls();
@@ -208,7 +253,6 @@ namespace DantesInferno.Launcher
 
         private void SaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            ApplySettingsToConfig();
             _config.Save();
             RefreshPlayStatus();
             MessageBox.Show("Settings saved to dantes_inferno.toml.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);

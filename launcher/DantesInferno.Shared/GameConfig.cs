@@ -139,13 +139,13 @@ namespace DantesInferno
 
         public int AnisotropicOverride
         {
-            get { return Get("anisotropic_override", 5); }
-            set { Set("anisotropic_override", Math.Max(-1, Math.Min(5, value))); }
+            get { return Get("anisotropic_override", -1); }
+            set { Set("anisotropic_override", Math.Max(-1, Math.Min(16, value))); }
         }
 
         public string SwapPostEffect
         {
-            get { return this["swap_post_effect"] ?? "fxaa"; }
+            get { return this["swap_post_effect"] ?? "none"; }
             set { this["swap_post_effect"] = value; }
         }
 
@@ -163,7 +163,7 @@ namespace DantesInferno
 
         public bool Native2xMsaa
         {
-            get { return Get("native_2x_msaa", true); }
+            get { return Get("native_2x_msaa", false); }
             set { Set("native_2x_msaa", value); }
         }
 
@@ -246,18 +246,18 @@ namespace DantesInferno
         public void ApplyRecommendedPreset()
         {
             Resolution = "1080p";
-            AnisotropicOverride = 5;
-            SwapPostEffect = "fxaa_extreme";
+            AnisotropicOverride = -1;
+            SwapPostEffect = "none";
             PresentEffect = "bilinear";
             VSync = true;
-            Native2xMsaa = true;
+            Native2xMsaa = false;
             Fullscreen = true;
             RenderTargetPath = "rov";
             InputBackend = "sdl";
             MnkMode = true;
             MnkMouse = true;
             MnkSensitivity = 1.5;
-            ResolutionScale = 2;
+            ResolutionScale = 1;
             LogLevel = "info";
             FrameCap = FrameCapOption.VSync60;
         }

@@ -34,5 +34,10 @@ namespace DantesInferno
         {
             return Path.Combine(installDirectory, "version.txt");
         }
+
+        public static string GetLogsPath(string installDirectory)
+        {
+            return Path.Combine(installDirectory, "logs");
+        }
     }
 }

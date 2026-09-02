@@ -32,7 +32,10 @@
                             <Button x:Name="PlayButton" Content="PLAY" FontSize="36" Padding="20,10" Width="200" Height="80" Click="PlayButton_Click" />
                             <Button Content="EXIT" FontSize="14" Padding="10,5" Width="120" Margin="0,15,0,0" Click="ExitButton_Click" />
                         </StackPanel>
-                        <TextBlock x:Name="PlayNoteText" Grid.Row="2" Text="Launching with the tested default settings." FontSize="11" Opacity="0.7" Margin="0,10" />
+                        <StackPanel Grid.Row="2" Margin="0,10">
+                            <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="True" Margin="0,5" />
+                            <TextBlock x:Name="PlayNoteText" Text="Launching with default Xbox 360 graphics + FMV fix." FontSize="11" Opacity="0.7" Margin="0,5" />
+                        </StackPanel>
                         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                             <Button Content="Support the Developer" Click="SupportButton_Click" />
                         </StackPanel>
@@ -41,23 +44,12 @@
                 </TabItem>
 
                 <TabItem Header="SETTINGS">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid>
                         <StackPanel Margin="10">
-
-                            <GroupBox Header="Game Files">
-                                <Grid Margin="10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Label Grid.Column="0" Content="Game Data:" />
-                                    <TextBox x:Name="GameDataTextBox" Grid.Column="1" IsReadOnly="True" />
-                                    <Button Grid.Column="2" Content="Browse" Width="80" Margin="5,0,0,0" Click="BrowseGameData_Click" />
-                                </Grid>
-                            </GroupBox>
-
-                            <GroupBox Header="Graphics (coming soon)">
+                            <StackPanel.Effect>
+                                <BlurEffect Radius="8" />
+                            </StackPanel.Effect>
+                            <GroupBox Header="Graphics">
                                 <Grid Margin="10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -101,7 +93,7 @@
                                 </Grid>
                             </GroupBox>
 
-                            <GroupBox Header="Controls &amp; Fixes (coming soon)">
+                            <GroupBox Header="Controls &amp; Fixes">
                                 <StackPanel Margin="10">
                                     <CheckBox x:Name="ControllerFixCheck" Content="Use SDL for controller support" />
                                     <CheckBox x:Name="SharpenCheck" Content="Sharpen visuals (FXAA Extreme + 16x aniso)" />
@@ -109,12 +101,21 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <TextBlock Text="* These settings are placeholders for a future update. Play uses the tested defaults." FontSize="11" Opacity="0.6" Margin="0,0,0,10" />
+                            <TextBlock Text="* Settings are applied on Play. Defaults match the original Xbox 360." FontSize="11" Opacity="0.6" Margin="0,0,0,10" />
 
                             <Button Content="Save Settings" HorizontalAlignment="Left" Width="120" Click="SaveSettings_Click" />
 
                         </StackPanel>
-                    </ScrollViewer>
+
+                        <Border x:Name="SettingsBlurOverlay" Background="#B0000000" IsHitTestVisible="True">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="COMING SOON" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                                <TextBlock Text="Settings will be available in a future release." FontSize="16" Foreground="#CCCCCC" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
+                                <TextBlock Text="The game currently launches with default Xbox 360 graphics" FontSize="12" Foreground="#999999" HorizontalAlignment="Center" Margin="0,15,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
+                                <TextBlock Text="plus the FMV stability fix." FontSize="12" Foreground="#999999" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </TabItem>
 
                 <TabItem Header="UPDATES">

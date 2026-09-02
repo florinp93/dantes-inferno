@@ -273,11 +273,11 @@ namespace DantesInferno.Installer
                 config.GameDataRoot = gameDir;
                 config.Resolution = "1080p";
                 config.RenderTargetPath = "rov";
-                config.SwapPostEffect = "fxaa_extreme";
-                config.AnisotropicOverride = 5;
-                config.ResolutionScale = 2;
+                config.SwapPostEffect = "none";
+                config.AnisotropicOverride = -1;
+                config.ResolutionScale = 1;
                 config.VSync = true;
-                config.Native2xMsaa = true;
+                config.Native2xMsaa = false;
                 config.Fullscreen = true;
                 config.InputBackend = "sdl";
                 config.Save();

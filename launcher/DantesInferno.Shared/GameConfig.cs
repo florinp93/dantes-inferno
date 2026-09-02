@@ -247,7 +247,7 @@ namespace DantesInferno
         {
             Resolution = "1080p";
             AnisotropicOverride = 5;
-            SwapPostEffect = "fxaa";
+            SwapPostEffect = "fxaa_extreme";
             PresentEffect = "bilinear";
             VSync = true;
             Native2xMsaa = true;
@@ -257,6 +257,7 @@ namespace DantesInferno
             MnkMode = true;
             MnkMouse = true;
             MnkSensitivity = 1.5;
+            ResolutionScale = 2;
             LogLevel = "info";
             FrameCap = FrameCapOption.VSync60;
         }

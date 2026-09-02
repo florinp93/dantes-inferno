@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace DantesInferno.Launcher
@@ -32,9 +31,9 @@ namespace DantesInferno.Launcher
                 if (File.Exists(iconPath))
                     this.Icon = BitmapFrame.Create(new Uri(iconPath, UriKind.Absolute));
 
-                string logoPath = Path.Combine(_installDir ?? PathHelper.ExecutableDirectory, "icon.png");
-                if (File.Exists(logoPath))
-                    LogoImage.Source = new BitmapImage(new Uri(logoPath, UriKind.Absolute));
+                string bannerPath = Path.Combine(_installDir ?? PathHelper.ExecutableDirectory, "banner.jpg");
+                if (File.Exists(bannerPath))
+                    BannerImage.Source = new BitmapImage(new Uri(bannerPath, UriKind.Absolute));
             }
             catch { }
         }
@@ -69,7 +68,7 @@ namespace DantesInferno.Launcher
                 case "none": AAModeCombo.SelectedIndex = 0; break;
                 case "fxaa": AAModeCombo.SelectedIndex = 1; break;
                 case "fxaa_extreme": AAModeCombo.SelectedIndex = 2; break;
-                default: AAModeCombo.SelectedIndex = 1; break;
+                default: AAModeCombo.SelectedIndex = 2; break;
             }
 
             MsaaCheck.IsChecked = _config.Native2xMsaa;
@@ -81,7 +80,7 @@ namespace DantesInferno.Launcher
             GameDataTextBox.Text = _config.GameDataRoot;
 
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
-            SharpenCheck.IsChecked = false;
+            SharpenCheck.IsChecked = _config.AnisotropicOverride == 5 && _config.SwapPostEffect == "fxaa_extreme";
             CommonFixesCheck.IsChecked = _config.RenderTargetPath.Equals("rov", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -111,11 +110,12 @@ namespace DantesInferno.Launcher
             {
                 _config.Resolution = "1080p";
                 _config.AnisotropicOverride = 5;
-                _config.SwapPostEffect = "fxaa";
+                _config.SwapPostEffect = "fxaa_extreme";
                 _config.VSync = true;
                 _config.Native2xMsaa = true;
                 _config.Fullscreen = true;
                 _config.RenderTargetPath = "rov";
+                _config.ResolutionScale = 2;
             }
         }
 
@@ -131,7 +131,7 @@ namespace DantesInferno.Launcher
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
-            ApplySettingsToConfig();
+            _config.GameDataRoot = GameDataTextBox.Text.Trim();
             _config.Save();
 
             string exePath = PathHelper.GetGameExecutablePath(_installDir);
@@ -148,10 +148,16 @@ namespace DantesInferno.Launcher
                 return;
             }
 
+            string arguments = string.Format(
+                "--game_data_root=\"{0}\" --render_target_path_d3d12=rov --resolution_scale=2 --anisotropic_override=5 --swap_post_effect=fxaa_extreme --native_2x_msaa=true --vsync=true",
+                gameData);
+
+            PlayNoteText.Text = "Launch command: dantes_inferno.exe " + arguments;
+
             var psi = new ProcessStartInfo
             {
                 FileName = exePath,
-                Arguments = "--game_data_root=\"" + gameData + "\"",
+                Arguments = arguments,
                 WorkingDirectory = _installDir,
                 UseShellExecute = false,
             };
@@ -187,7 +193,15 @@ namespace DantesInferno.Launcher
 
         private void ApplyRecommended_Click(object sender, RoutedEventArgs e)
         {
-            _config.ApplyRecommendedPreset();
+            _config.Resolution = "1080p";
+            _config.AnisotropicOverride = 5;
+            _config.SwapPostEffect = "fxaa_extreme";
+            _config.VSync = true;
+            _config.Native2xMsaa = true;
+            _config.Fullscreen = true;
+            _config.RenderTargetPath = "rov";
+            _config.ResolutionScale = 2;
+            _config.InputBackend = "sdl";
             AutoOptimizationsCheck.IsChecked = true;
             PopulateControls();
         }
@@ -210,7 +224,7 @@ namespace DantesInferno.Launcher
                 if (release.Version > localVersion)
                 {
                     string assetInfo = "";
-                    var asset = release.Assets.FirstOrDefault(a => a.Name.Equals("DantesInferno-Release.zip", StringComparison.OrdinalIgnoreCase));
+                    var asset = release.Assets.FirstOrDefault(a => a.Name.Equals("DantesInfernoInstaller.exe", StringComparison.OrdinalIgnoreCase));
                     if (asset != null)
                     {
                         assetInfo = $"\n\nDownload: {asset.BrowserDownloadUrl}";
@@ -226,6 +240,11 @@ namespace DantesInferno.Launcher
             {
                 UpdateStatusText.Text = "Failed to check for updates:\n" + ex.Message;
             }
+        }
+
+        private void SupportButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://ko-fi.com/zerkiller") { UseShellExecute = true });
         }
     }
 }

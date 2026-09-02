@@ -77,6 +77,14 @@
             <Setter Property="Foreground" Value="Black" />
             <Setter Property="Background" Value="{StaticResource TextBrush}" />
             <Setter Property="Padding" Value="5,3" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Background" Value="{StaticResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Padding" Value="5,3" />
         </Style>
 
         <Style TargetType="TextBox">
@@ -88,6 +96,13 @@
         <Style TargetType="CheckBox">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
             <Setter Property="Margin" Value="0,5" />
+        </Style>
+
+        <Style TargetType="GroupBox">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Margin" Value="0,0,0,15" />
+            <Setter Property="Padding" Value="10" />
         </Style>
     </Application.Resources>
 </Application>

@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace DantesInferno.Installer
 {
@@ -16,6 +16,7 @@ namespace DantesInferno.Installer
         private string _destination;
         private string _isoPath;
         private string _installerDir;
+        private string _payloadDir;
         private readonly BackgroundWorker _worker = new BackgroundWorker();
 
         public MainWindow()
@@ -23,6 +24,7 @@ namespace DantesInferno.Installer
             InitializeComponent();
             InitializeTheme();
             _installerDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            _payloadDir = ExtractEmbeddedPayload();
             UpdateNavigation();
 
             _worker.WorkerReportsProgress = true;
@@ -41,6 +43,85 @@ namespace DantesInferno.Installer
                     this.Icon = BitmapFrame.Create(new Uri(iconPath, UriKind.Absolute));
             }
             catch { }
+        }
+
+        private string ExtractEmbeddedPayload()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string marker = "DANTES_PAYLOAD";
+            byte[] markerBytes = Encoding.ASCII.GetBytes(marker);
+            int trailerSize = markerBytes.Length + sizeof(long);
+
+            try
+            {
+                using (var stream = new FileStream(exePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    long length = stream.Length;
+                    if (length < trailerSize)
+                        return null;
+
+                    stream.Seek(length - markerBytes.Length, SeekOrigin.Begin);
+                    byte[] fileMarker = new byte[markerBytes.Length];
+                    stream.Read(fileMarker, 0, fileMarker.Length);
+                    if (!fileMarker.SequenceEqual(markerBytes))
+                        return null;
+
+                    stream.Seek(length - trailerSize, SeekOrigin.Begin);
+                    byte[] sizeBytes = new byte[sizeof(long)];
+                    stream.Read(sizeBytes, 0, sizeBytes.Length);
+                    long payloadSize = BitConverter.ToInt64(sizeBytes, 0);
+
+                    long payloadOffset = length - trailerSize - payloadSize;
+                    if (payloadOffset < 0)
+                        return null;
+
+                    stream.Seek(payloadOffset, SeekOrigin.Begin);
+                    byte[] payload = new byte[payloadSize];
+                    stream.Read(payload, 0, payload.Length);
+
+                    string tempRoot = Path.Combine(Path.GetTempPath(), "DantesInferno", Guid.NewGuid().ToString("N"));
+                    Directory.CreateDirectory(tempRoot);
+                    ExtractPayloadArchive(payload, tempRoot);
+                    return tempRoot;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Payload extraction failed: " + ex.Message);
+                return null;
+            }
+        }
+
+        private void ExtractPayloadArchive(byte[] payload, string targetRoot)
+        {
+            using (var ms = new MemoryStream(payload))
+            using (var reader = new BinaryReader(ms, Encoding.UTF8))
+            {
+                int count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    int pathLen = reader.ReadInt32();
+                    byte[] pathBytes = reader.ReadBytes(pathLen);
+                    string relativePath = Encoding.UTF8.GetString(pathBytes);
+                    long fileLen = reader.ReadInt64();
+                    byte[] fileBytes = reader.ReadBytes((int)fileLen);
+
+                    string targetPath = Path.Combine(targetRoot, relativePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+                    File.WriteAllBytes(targetPath, fileBytes);
+                }
+            }
+        }
+
+        private string GetPayloadFile(string relativePath)
+        {
+            if (!string.IsNullOrEmpty(_payloadDir))
+            {
+                string payloadFile = Path.Combine(_payloadDir, relativePath);
+                if (File.Exists(payloadFile) || Directory.Exists(payloadFile))
+                    return payloadFile;
+            }
+            return Path.Combine(_installerDir, relativePath);
         }
 
         private void UpdateNavigation()
@@ -140,14 +221,14 @@ namespace DantesInferno.Installer
                 }
 
                 _worker.ReportProgress(10, "Extracting ISO to game folder...");
-                string extractExe = Path.Combine(_installerDir, "extract-xiso.exe");
+                string extractExe = GetPayloadFile("extract-xiso.exe");
                 if (!File.Exists(extractExe))
-                    throw new FileNotFoundException("extract-xiso.exe was not found next to the installer.");
+                    throw new FileNotFoundException("extract-xiso.exe was not found in the installer payload.");
 
                 var psi = new ProcessStartInfo
                 {
                     FileName = extractExe,
-                    Arguments = $"\"{_isoPath}\" -d \"{gameDir}\" -s -q",
+                    Arguments = $"-x -d \"{gameDir}\" -s -q \"{_isoPath}\"",
                     WorkingDirectory = _destination,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -157,16 +238,20 @@ namespace DantesInferno.Installer
 
                 using (var process = Process.Start(psi))
                 {
+                    process.OutputDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, ev.Data); };
+                    process.ErrorDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, ev.Data); };
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
                     process.WaitForExit();
-                    string errors = process.StandardError.ReadToEnd();
-                    if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(errors))
-                        throw new InvalidOperationException("extract-xiso failed: " + errors);
+
+                    if (process.ExitCode != 0)
+                        throw new InvalidOperationException("extract-xiso exited with code " + process.ExitCode);
                 }
 
-                _worker.ReportProgress(50, "Copying ReXGlue game files...");
-                string distDir = Path.Combine(_installerDir, "dist");
+                _worker.ReportProgress(50, "Copying game files...");
+                string distDir = GetPayloadFile("dist");
                 if (!Directory.Exists(distDir))
-                    throw new DirectoryNotFoundException("The 'dist' folder was not found next to the installer. Build a release first.");
+                    throw new DirectoryNotFoundException("The 'dist' folder was not found in the installer payload.");
 
                 var filesToCopy = Directory.GetFiles(distDir, "*", SearchOption.AllDirectories);
                 int index = 0;
@@ -187,6 +272,13 @@ namespace DantesInferno.Installer
                 config.GameDataRoot = gameDir;
                 config.Resolution = "1080p";
                 config.RenderTargetPath = "rov";
+                config.SwapPostEffect = "fxaa_extreme";
+                config.AnisotropicOverride = 5;
+                config.ResolutionScale = 2;
+                config.VSync = true;
+                config.Native2xMsaa = true;
+                config.Fullscreen = true;
+                config.InputBackend = "sdl";
                 config.Save();
 
                 GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse("0.1.0-alpha"));

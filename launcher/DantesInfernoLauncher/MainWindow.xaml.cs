@@ -93,6 +93,9 @@ namespace DantesInferno.Launcher
             // Controller
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
 
+            // Logging
+            LoggingEnabledCheck.IsChecked = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
+
             // Frame rate — disabled, game runs at hardcoded 60 FPS.
             // Re-enable if the game's internal frame rate is patched.
             // FrameCapCombo.ItemsSource = new List<string> { "60 FPS (VSync On)", "120 FPS (VSync On)", "Unlimited (VSync Off)" };
@@ -156,6 +159,10 @@ namespace DantesInferno.Launcher
 
             // Controller
             _config.InputBackend = (ControllerFixCheck.IsChecked ?? false) ? "sdl" : "none";
+
+            // Logging
+            bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
+            _config.LogLevel = loggingEnabled ? "info" : "off";
 
             // Frame rate — disabled, game runs at hardcoded 60 FPS.
             // int frameIdx = FrameCapCombo.SelectedIndex;

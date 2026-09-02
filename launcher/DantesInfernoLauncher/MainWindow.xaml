@@ -39,7 +39,7 @@
                         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                             <Button Content="Support the Developer" Click="SupportButton_Click" />
                         </StackPanel>
-                        <TextBlock x:Name="VersionText" Grid.Row="3" Text="Version: 0.3.0-alpha" FontSize="12" Opacity="0.7" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="VersionText" Grid.Row="3" Text="Version: 0.3.1-alpha" FontSize="12" Opacity="0.7" HorizontalAlignment="Right" />
                     </Grid>
                 </TabItem>
 
@@ -116,7 +116,7 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <TextBlock Text="Check for Updates" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" />
-                        <TextBlock x:Name="UpdateVersionText" Grid.Row="1" Text="Installed version: 0.3.0-alpha" Margin="0,5" />
+                        <TextBlock x:Name="UpdateVersionText" Grid.Row="1" Text="Installed version: 0.3.1-alpha" Margin="0,5" />
                         <Button x:Name="CheckUpdatesButton" Grid.Row="2" Content="Check for Updates" HorizontalAlignment="Left" Width="150" Margin="0,10" Click="CheckUpdates_Click" />
                         <TextBox x:Name="UpdateStatusText" Grid.Row="3" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{StaticResource BackgroundPanel}" Foreground="{StaticResource TextBrush}" BorderBrush="{StaticResource BorderBrush}" Padding="10" />
                     </Grid>

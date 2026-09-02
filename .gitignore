@@ -72,6 +72,8 @@ test/minidumps/
 test/run_*.log
 test/headless_test_run.log
 tools/__pycache__/
+tools/extract-xiso/build/
+tools/extract-xiso/*.obj
 __pycache__/
 *.pyc
 

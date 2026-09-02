@@ -52,19 +52,24 @@ namespace DantesInferno.Launcher
 
         private void PopulateControls()
         {
-            VersionText.Text = "Version: " + GitHubUpdater.GetLocalVersion(_installDir);
-            UpdateVersionText.Text = "Installed version: " + GitHubUpdater.GetLocalVersion(_installDir);
+            var version = GitHubUpdater.GetLocalVersion(_installDir);
+            VersionText.Text = "Version: " + version.ToString();
+            UpdateVersionText.Text = "Installed version: " + version.ToString();
 
-            ResolutionCombo.ItemsSource = new List<string> { "720p", "1080p", "1440p", "4k", "2560x1080", "3440x1440" };
-            ResolutionCombo.SelectedItem = _config.Resolution ?? "1080p";
+            // Resolution scale — the main quality setting
+            ResScaleCombo.ItemsSource = new List<string>
+            {
+                "Original (720p)",
+                "2x (1440p)",
+                "3x (2160p / 4K)"
+            };
+            int scale = _config.ResolutionScale;
+            if (scale < 1) scale = 1;
+            if (scale > 3) scale = 3;
+            ResScaleCombo.SelectedIndex = scale - 1;
 
-            FrameCapCombo.ItemsSource = new List<string> { "60 Hz (VSync On)", "120 Hz (VSync On)", "Unlimited (VSync Off)" };
-            FrameCapCombo.SelectedIndex = (int)_config.FrameCap;
-
-            AnisoCombo.ItemsSource = new List<string> { "No override (-1)", "Off (0)", "1x", "2x", "4x", "8x", "16x" };
-            AnisoCombo.SelectedIndex = _config.AnisotropicOverride + 1;
-
-            AAModeCombo.ItemsSource = new List<string> { "None", "FXAA", "FXAA Extreme" };
+            // Anti-aliasing
+            AAModeCombo.ItemsSource = new List<string> { "Off", "FXAA", "FXAA Extreme" };
             switch (_config.SwapPostEffect)
             {
                 case "none": AAModeCombo.SelectedIndex = 0; break;
@@ -73,15 +78,24 @@ namespace DantesInferno.Launcher
                 default: AAModeCombo.SelectedIndex = 0; break;
             }
 
-            MsaaCheck.IsChecked = _config.Native2xMsaa;
+            // Texture filtering
+            AnisoCombo.ItemsSource = new List<string> { "Default", "1x", "2x", "4x", "8x", "16x" };
+            int aniso = _config.AnisotropicOverride;
+            if (aniso < 0) aniso = 0;       // Default
+            else if (aniso == 0) aniso = 0;  // Off maps to Default in UI
+            else aniso = Array.IndexOf(new[] { 0, 1, 2, 4, 8, 16 }, aniso);
+            if (aniso < 0) aniso = 0;
+            AnisoCombo.SelectedIndex = aniso;
+
+            // Fullscreen
             FullscreenCheck.IsChecked = _config.Fullscreen;
 
-            ResScaleCombo.ItemsSource = new List<string> { "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x" };
-            ResScaleCombo.SelectedIndex = _config.ResolutionScale - 1;
-
+            // Controller
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
-            SharpenCheck.IsChecked = _config.AnisotropicOverride == 5 && _config.SwapPostEffect == "fxaa_extreme";
-            CommonFixesCheck.IsChecked = _config.RenderTargetPath.Equals("rov", StringComparison.OrdinalIgnoreCase);
+
+            // Frame rate
+            FrameCapCombo.ItemsSource = new List<string> { "60 FPS (VSync On)", "120 FPS (VSync On)", "Unlimited (VSync Off)" };
+            FrameCapCombo.SelectedIndex = (int)_config.FrameCap;
         }
 
         private void RefreshPlayStatus()
@@ -110,6 +124,44 @@ namespace DantesInferno.Launcher
             catch { }
         }
 
+        private void SaveSettingsToConfig()
+        {
+            // Resolution scale
+            int scaleIdx = ResScaleCombo.SelectedIndex;
+            if (scaleIdx < 0) scaleIdx = 0;
+            _config.ResolutionScale = scaleIdx + 1;
+
+            // Anti-aliasing
+            int aaIdx = AAModeCombo.SelectedIndex;
+            switch (aaIdx)
+            {
+                case 1: _config.SwapPostEffect = "fxaa"; break;
+                case 2: _config.SwapPostEffect = "fxaa_extreme"; break;
+                default: _config.SwapPostEffect = "none"; break;
+            }
+
+            // Texture filtering
+            int anisoIdx = AnisoCombo.SelectedIndex;
+            if (anisoIdx <= 0)
+                _config.AnisotropicOverride = -1; // Default
+            else
+            {
+                int[] anisoValues = { 0, 1, 2, 4, 8, 16 };
+                _config.AnisotropicOverride = anisoValues[anisoIdx];
+            }
+
+            // Fullscreen
+            _config.Fullscreen = FullscreenCheck.IsChecked ?? true;
+
+            // Controller
+            _config.InputBackend = (ControllerFixCheck.IsChecked ?? false) ? "sdl" : "none";
+
+            // Frame rate
+            int frameIdx = FrameCapCombo.SelectedIndex;
+            if (frameIdx >= 0)
+                _config.FrameCap = (FrameCapOption)frameIdx;
+        }
+
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             if (_gameRunning)
@@ -132,17 +184,43 @@ namespace DantesInferno.Launcher
                 return;
             }
 
+            // Save settings before launching
+            SaveSettingsToConfig();
+            _config.Save();
+
             bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
 
             ClearOldLogs();
 
             var args = new List<string>();
             args.Add(string.Format("--game_data_root=\"{0}\"", gameData));
-            args.Add("--render_target_path_d3d12=rov");
+
+            // Resolution scale
+            int scale = _config.ResolutionScale;
+            if (scale > 1)
+                args.Add(string.Format("--resolution_scale={0}", scale));
+
+            // Anti-aliasing
+            if (!string.IsNullOrEmpty(_config.SwapPostEffect) && _config.SwapPostEffect != "none")
+                args.Add(string.Format("--swap_post_effect={0}", _config.SwapPostEffect));
+
+            // Anisotropic override
+            if (_config.AnisotropicOverride >= 0)
+                args.Add(string.Format("--anisotropic_override={0}", _config.AnisotropicOverride));
+
+            // VSync / frame rate
+            if (!_config.VSync)
+                args.Add("--vsync=false");
+
+            // Input
+            if (_config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase))
+                args.Add("--input_backend=sdl");
+
+            // Logging
             args.Add(loggingEnabled ? "--log_level=info" : "--log_level=off");
 
             string arguments = string.Join(" ", args);
-            PlayNoteText.Text = "Launch command: dantes_inferno.exe " + arguments;
+            PlayNoteText.Text = "Launching with " + (scale > 1 ? scale + "x resolution" : "original resolution") + "...";
             PlayButton.IsEnabled = false;
             _gameRunning = true;
 
@@ -238,24 +316,25 @@ namespace DantesInferno.Launcher
 
         private void ApplyRecommended_Click(object sender, RoutedEventArgs e)
         {
-            _config.Resolution = "1080p";
+            _config.ResolutionScale = 2;
+            _config.SwapPostEffect = "fxaa";
             _config.AnisotropicOverride = -1;
-            _config.SwapPostEffect = "none";
             _config.VSync = true;
-            _config.Native2xMsaa = false;
             _config.Fullscreen = true;
-            _config.RenderTargetPath = "rov";
-            _config.ResolutionScale = 1;
             _config.InputBackend = "sdl";
-            AutoOptimizationsCheck.IsChecked = true;
+            _config.FrameCap = FrameCapOption.VSync60;
             PopulateControls();
+            MessageBox.Show("Recommended settings applied. Click Save Settings to keep them.", "Recommended",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void SaveSettings_Click(object sender, RoutedEventArgs e)
         {
+            SaveSettingsToConfig();
             _config.Save();
             RefreshPlayStatus();
-            MessageBox.Show("Settings saved to dantes_inferno.toml.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Settings saved. They will be applied when you click PLAY.", "Saved",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void CheckUpdates_Click(object sender, RoutedEventArgs e)

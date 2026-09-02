@@ -1,7 +1,7 @@
 <Window x:Class="DantesInferno.Launcher.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Hell's Gate Launcher - Dante's Inferno" Height="620" Width="980"
+        Title="Dante's Inferno" Height="620" Width="980"
         MinHeight="580" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundDark}">
@@ -34,88 +34,74 @@
                         </StackPanel>
                         <StackPanel Grid.Row="2" Margin="0,10">
                             <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="True" Margin="0,5" />
-                            <TextBlock x:Name="PlayNoteText" Text="Launching with default Xbox 360 graphics + FMV fix." FontSize="11" Opacity="0.7" Margin="0,5" />
+                            <TextBlock x:Name="PlayNoteText" Text="" FontSize="11" Opacity="0.7" Margin="0,5" />
                         </StackPanel>
                         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                             <Button Content="Support the Developer" Click="SupportButton_Click" />
                         </StackPanel>
-                        <TextBlock x:Name="VersionText" Grid.Row="3" Text="Version: 0.1.0.0" FontSize="12" Opacity="0.7" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="VersionText" Grid.Row="3" Text="Version: 0.3.0-alpha" FontSize="12" Opacity="0.7" HorizontalAlignment="Right" />
                     </Grid>
                 </TabItem>
 
                 <TabItem Header="SETTINGS">
-                    <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
                         <StackPanel Margin="10">
-                            <StackPanel.Effect>
-                                <BlurEffect Radius="8" />
-                            </StackPanel.Effect>
-                            <GroupBox Header="Graphics">
+
+                            <GroupBox Header="Graphics Quality">
                                 <Grid Margin="10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="180" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Grid.Row="0" Grid.Column="0" Content="Resolution:" />
-                                    <ComboBox x:Name="ResolutionCombo" Grid.Row="0" Grid.Column="1" />
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Resolution Scale:" />
+                                    <ComboBox x:Name="ResScaleCombo" Grid.Row="0" Grid.Column="1" Margin="0,2" />
 
-                                    <Label Grid.Row="1" Grid.Column="0" Content="Frame Rate:" />
-                                    <ComboBox x:Name="FrameCapCombo" Grid.Row="1" Grid.Column="1" />
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Anti-Aliasing:" />
+                                    <ComboBox x:Name="AAModeCombo" Grid.Row="1" Grid.Column="1" Margin="0,2" />
 
-                                    <CheckBox x:Name="FullscreenCheck" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="Fullscreen" Margin="0,5" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Texture Filtering:" />
+                                    <ComboBox x:Name="AnisoCombo" Grid.Row="2" Grid.Column="1" Margin="0,2" />
 
-                                    <Label Grid.Row="3" Grid.Column="0" Content="Texture Filtering:" />
-                                    <ComboBox x:Name="AnisoCombo" Grid.Row="3" Grid.Column="1" />
-
-                                    <Label Grid.Row="4" Grid.Column="0" Content="Anti-Aliasing:" />
-                                    <ComboBox x:Name="AAModeCombo" Grid.Row="4" Grid.Column="1" />
-
-                                    <CheckBox x:Name="MsaaCheck" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Content="Use MSAA" Margin="0,5" />
-
-                                    <Label Grid.Row="6" Grid.Column="0" Content="Resolution Scale:" />
-                                    <ComboBox x:Name="ResScaleCombo" Grid.Row="6" Grid.Column="1" IsEnabled="False" ToolTip="Disabled while a rendering bug is being fixed." />
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="* Resolution scale is currently disabled." FontSize="11" Opacity="0.6" Margin="0,3" />
-
-                                    <CheckBox x:Name="AutoOptimizationsCheck" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Content="Use recommended settings when available" Margin="0,10" />
-                                    <Button Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Content="Reset to Recommended" HorizontalAlignment="Left" Width="180" Click="ApplyRecommended_Click" />
+                                    <CheckBox x:Name="FullscreenCheck" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="Fullscreen" Margin="0,8,0,0" />
                                 </Grid>
                             </GroupBox>
 
-                            <GroupBox Header="Controls &amp; Fixes">
+                            <GroupBox Header="Controls">
                                 <StackPanel Margin="10">
-                                    <CheckBox x:Name="ControllerFixCheck" Content="Use SDL for controller support" />
-                                    <CheckBox x:Name="SharpenCheck" Content="Sharpen visuals (FXAA Extreme + 16x aniso)" />
-                                    <CheckBox x:Name="CommonFixesCheck" Content="Use ROV graphics fix for stability" />
+                                    <CheckBox x:Name="ControllerFixCheck" Content="Use controller (Xbox / PlayStation controllers)" Margin="0,3" />
                                 </StackPanel>
                             </GroupBox>
 
-                            <TextBlock Text="* Settings are applied on Play. Defaults match the original Xbox 360." FontSize="11" Opacity="0.6" Margin="0,0,0,10" />
+                            <GroupBox Header="Performance">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Row="0" Grid.Column="0" Content="Frame Rate:" />
+                                    <ComboBox x:Name="FrameCapCombo" Grid.Row="0" Grid.Column="1" Margin="0,2" />
+                                </Grid>
+                            </GroupBox>
 
-                            <Button Content="Save Settings" HorizontalAlignment="Left" Width="120" Click="SaveSettings_Click" />
+                            <TextBlock Text="Settings are applied when you click PLAY." FontSize="11" Opacity="0.6" Margin="0,5,0,10" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                                <Button Content="Reset to Recommended" Width="180" Click="ApplyRecommended_Click" Margin="0,0,10,0" />
+                                <Button Content="Save Settings" Width="120" Click="SaveSettings_Click" />
+                            </StackPanel>
 
                         </StackPanel>
-
-                        <Border x:Name="SettingsBlurOverlay" Background="#B0000000" IsHitTestVisible="True">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="COMING SOON" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10" />
-                                <TextBlock Text="Settings will be available in a future release." FontSize="16" Foreground="#CCCCCC" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
-                                <TextBlock Text="The game currently launches with default Xbox 360 graphics" FontSize="12" Foreground="#999999" HorizontalAlignment="Center" Margin="0,15,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
-                                <TextBlock Text="plus the FMV stability fix." FontSize="12" Foreground="#999999" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="400" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                    </ScrollViewer>
                 </TabItem>
 
                 <TabItem Header="UPDATES">
@@ -126,8 +112,8 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Auto-Updater" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" />
-                        <TextBlock x:Name="UpdateVersionText" Grid.Row="1" Text="Installed version: 0.1.0.0" Margin="0,5" />
+                        <TextBlock Text="Check for Updates" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" />
+                        <TextBlock x:Name="UpdateVersionText" Grid.Row="1" Text="Installed version: 0.3.0-alpha" Margin="0,5" />
                         <Button x:Name="CheckUpdatesButton" Grid.Row="2" Content="Check for Updates" HorizontalAlignment="Left" Width="150" Margin="0,10" Click="CheckUpdates_Click" />
                         <TextBox x:Name="UpdateStatusText" Grid.Row="3" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{StaticResource BackgroundPanel}" Foreground="{StaticResource TextBrush}" BorderBrush="{StaticResource BorderBrush}" Padding="10" />
                     </Grid>

@@ -79,6 +79,8 @@
                                 </StackPanel>
                             </GroupBox>
 
+                            <!-- Frame rate / VSync setting removed — the game runs at a hardcoded 60 FPS.
+                                 Re-enable this later if the game's internal frame rate is patched.
                             <GroupBox Header="Performance">
                                 <Grid Margin="10">
                                     <Grid.RowDefinitions>
@@ -92,6 +94,7 @@
                                     <ComboBox x:Name="FrameCapCombo" Grid.Row="0" Grid.Column="1" Margin="0,2" />
                                 </Grid>
                             </GroupBox>
+                            -->
 
                             <TextBlock Text="Settings are applied when you click PLAY." FontSize="11" Opacity="0.6" Margin="0,5,0,10" />
 

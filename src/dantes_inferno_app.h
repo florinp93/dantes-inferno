@@ -9,12 +9,116 @@
 #include <rex/chrono/clock.h>
 #include <rex/input/flags.h>
 #include <rex/ui/keybinds.h>
+#include <rex/ui/imgui_dialog.h>
+#include <rex/ui/presenter.h>
 #include <rex/logging/macros.h>
+
+#include <array>
+#include <chrono>
 
 // Time scalar cvar: 1.0 = normal speed, 50.0 = 50x fast-forward for FMVs.
 // Can be set from the console (backtick key) or toggled with F2.
 REXCVAR_DEFINE_DOUBLE(time_scalar, 1.0, "Gameplay",
                       "Guest time scaling factor (1.0 = normal, 50.0 = fast-forward)");
+
+// Toggle for the FPS overlay.
+REXCVAR_DEFINE_BOOL(show_fps_overlay, false, "UI",
+                    "Show FPS and frametime overlay (top-left corner)");
+
+// Simple FPS + frametime overlay dialog, always visible in top-left corner.
+// Measures actual guest frame rate (game frames), not host present rate.
+class FpsOverlayDialog : public rex::ui::ImGuiDialog {
+ public:
+  explicit FpsOverlayDialog(rex::ui::ImGuiDrawer* drawer,
+                            rex::ui::Presenter* presenter)
+      : rex::ui::ImGuiDialog(drawer),
+        presenter_(presenter),
+        last_time_(std::chrono::steady_clock::now()),
+        last_guest_frame_count_(presenter ? presenter->guest_frame_count() : 0) {}
+
+ protected:
+  void OnDraw(ImGuiIO& io) override {
+    auto now = std::chrono::steady_clock::now();
+    auto delta = std::chrono::duration<double, std::milli>(now - last_time_);
+    last_time_ = now;
+
+    // Read the guest frame counter from the presenter to get the actual
+    // game frame rate (not the host present rate).
+    uint64_t current_guest_frames = presenter_ ? presenter_->guest_frame_count() : 0;
+    uint64_t frames_delta = current_guest_frames - last_guest_frame_count_;
+    last_guest_frame_count_ = current_guest_frames;
+
+    double interval_ms = delta.count();
+    double guest_fps = 0;
+    double guest_ft_ms = 0;
+    if (frames_delta > 0 && interval_ms > 0) {
+      guest_fps = frames_delta * 1000.0 / interval_ms;
+      guest_ft_ms = interval_ms / frames_delta;
+    }
+
+    // Update frametime history (rolling buffer).
+    frame_history_[history_idx_] = static_cast<float>(guest_ft_ms);
+    history_idx_ = (history_idx_ + 1) % kHistorySize;
+
+    // Smoothed values (exponential moving average).
+    if (smoothed_fps_ == 0.0) {
+      smoothed_fps_ = guest_fps;
+      smoothed_ft_ = guest_ft_ms;
+    } else {
+      smoothed_fps_ = smoothed_fps_ * 0.85 + guest_fps * 0.15;
+      smoothed_ft_ = smoothed_ft_ * 0.85 + guest_ft_ms * 0.15;
+    }
+
+    // Draw window in top-left corner, no title bar, no interaction.
+    ImGui::SetNextWindowPos(ImVec2(8, 8), ImGuiCond_Always);
+    ImGui::SetNextWindowBgAlpha(0.65f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 8));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 4.0f);
+
+    bool visible = true;
+    if (ImGui::Begin("##fps_overlay", &visible,
+                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                         ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav |
+                         ImGuiWindowFlags_NoSavedSettings |
+                         ImGuiWindowFlags_AlwaysAutoResize |
+                         ImGuiWindowFlags_NoFocusOnAppearing)) {
+      // FPS text - large, color-coded
+      ImGui::SetWindowFontScale(2.0f);
+      ImU32 fps_color = smoothed_fps_ >= 55.0f ? IM_COL32(80, 255, 80, 255) :
+                       smoothed_fps_ >= 30.0f ? IM_COL32(255, 220, 60, 255) :
+                                                IM_COL32(255, 80, 80, 255);
+      ImGui::PushStyleColor(ImGuiCol_Text, fps_color);
+      ImGui::Text("%.0f FPS", smoothed_fps_);
+      ImGui::PopStyleColor();
+      ImGui::SetWindowFontScale(1.0f);
+
+      // Frametime text
+      ImGui::SetWindowFontScale(1.3f);
+      ImGui::Text("%.1f ms", smoothed_ft_);
+      ImGui::SetWindowFontScale(1.0f);
+
+      // Frametime graph
+      ImGui::Spacing();
+      ImGui::PlotLines("##frametime", frame_history_.data(),
+                       static_cast<int>(kHistorySize),
+                       static_cast<int>(history_idx_), nullptr,
+                       0.0f, 50.0f, ImVec2(220, 50));
+    }
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+  }
+
+ private:
+  static constexpr size_t kHistorySize = 120;
+  std::array<float, kHistorySize> frame_history_{};
+  size_t history_idx_ = 0;
+  rex::ui::Presenter* presenter_;
+  std::chrono::steady_clock::time_point last_time_;
+  uint64_t last_guest_frame_count_;
+  double smoothed_fps_ = 0.0;
+  double smoothed_ft_ = 0.0;
+};
 
 class DantesInfernoApp : public rex::ReXApp {
  public:
@@ -157,6 +261,25 @@ class DantesInfernoApp : public rex::ReXApp {
           rex::chrono::Clock::set_guest_time_scalar(scalar);
         });
 
+    // Create the FPS overlay if enabled.
+    if (REXCVAR_GET(show_fps_overlay) && imgui_drawer()) {
+      auto* gfx_sys = runtime() ? runtime()->graphics_system() : nullptr;
+      auto* presenter = gfx_sys ? gfx_sys->presenter() : nullptr;
+      fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), presenter);
+    }
+
+    // F1 toggles the FPS overlay on/off.
+    rex::ui::RegisterBind("bind_fps_overlay", "F1",
+                          "Toggle FPS overlay", [this] {
+      if (fps_overlay_) {
+        fps_overlay_.reset();
+      } else if (imgui_drawer()) {
+        auto* gfx_sys = runtime() ? runtime()->graphics_system() : nullptr;
+        auto* presenter = gfx_sys ? gfx_sys->presenter() : nullptr;
+        fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), presenter);
+      }
+    });
+
     // F2 toggles between 1.0x and 50.0x for quick FMV fast-forward.
     // FMV players are typically frame-based (one video frame per game loop
     // iteration), not time-based, so time scaling alone doesn't speed them up.
@@ -176,9 +299,14 @@ class DantesInfernoApp : public rex::ReXApp {
 
   void OnShutdown() override {
     rex::ui::UnregisterBind("bind_fast_forward");
+    rex::ui::UnregisterBind("bind_fps_overlay");
     rex::cvar::UnregisterChangeCallbacks("time_scalar");
+    fps_overlay_.reset();
     // Restore normal speed and vsync on exit.
     rex::chrono::Clock::set_guest_time_scalar(1.0);
     rex::cvar::SetFlagByName("vsync", "true");
   }
+
+ private:
+  std::unique_ptr<FpsOverlayDialog> fps_overlay_;
 };

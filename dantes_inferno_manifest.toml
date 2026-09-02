@@ -10,6 +10,13 @@ file_path = "game/default.xex"
 out_directory_path = "generated/default"
 includes = []
 
+# Mid-assembly hooks - inject custom C++ at a PPC address
+[[midasm_hook]]
+address = 0x82701240
+name = "ZeroFiberSwitchCallback"
+registers = []
+ret = false
+
 # Unresolved branch/call targets not discovered by codegen's static analysis.
 # These are reached via indirect calls, conditional branches to mid-function
 # addresses, or function pointers that the data-section scanner found but

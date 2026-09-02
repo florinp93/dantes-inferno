@@ -15,6 +15,10 @@ the ReXGlue SDK (v0.10.0). ReXGlue translates PowerPC XEX -> C++ ahead of time.
 - `game/` - extracted Xbox 360 game files (gitignored, copyrighted - never commit)
 - `thirdparty/rexglue-sdk/` - SDK clone (gitignored, via setup.ps1)
 - `docs/rexglue_notes.md` - ReXGlue workflow & command reference
+- `docs/ultrawide_research.md` - Ultrawide support RE findings & implementation plan
+- `tools/asset_tool.py` - asset extraction/packing tool (BIG/STR/TG4D/VP6)
+- `tools/ASSET_TOOL_README.md` - asset tool documentation
+- `tools/Gibbed.Visceral/` - format reference source (gitignored, Zlib license)
 
 ## Build commands (Windows)
 
@@ -80,9 +84,7 @@ fixed (see `docs/vp6_fmv_corruption_fix.md`).
 ## SDK patches
 
 The SDK under `thirdparty/rexglue-sdk/` has local patches to
-`src/codegen/builders/vector.cpp` that fix three VMX instruction builder bugs.
-These fixes are submitted upstream as
-[rexglue/rexglue-sdk#426](https://github.com/rexglue/rexglue-sdk/pull/426).
+`src/codegen/builders/vector.cpp` that fix VMX instruction builder bugs.
 Full technical documentation: `docs/vp6_fmv_corruption_fix.md`.
 
 If the SDK is re-cloned, these patches must be re-applied. The fixes are:
@@ -90,8 +92,12 @@ If the SDK is re-cloned, these patches must be re-applied. The fixes are:
 1. **`vpkuwus` / `vpkuhus` in-place aliasing** (root cause of FMV corruption):
    Element-by-element packing loops aliased the destination's narrowed array
    with the source's wider array. Replaced with SSE intrinsics.
-2. **`vmsum3fp128` dot product mask** (`0xEF` → `0x7F`): Wrong broadcast
-   pattern in the SSE `dp_ps` imm8 mask.
+2. **`vmsum3fp128` dot product mask** (`0x7F` → `0xEF`): A previous "fix"
+   incorrectly changed the mask from `0xEF` to `0x7F`, which excluded PPC
+   element 0 (X component) from 3-element dot products instead of excluding
+   PPC element 3 (W). This broke physics/collision code, causing the
+   character to fall through the map after the opening cutscene. Reverted
+   to `0xEF` after the `ppc_tests` test suite caught the regression.
 3. **Pack builder `unpackhi_epi64` removal**: Pack builders discarded half
    the packed elements via `unpackhi_epi64`. Removed and operand-swapped for
    byte reversal.
@@ -105,8 +111,84 @@ If the SDK is re-cloned, these patches must be re-applied. The fixes are:
 - Always launch with `--game_data_root=game` from the project root.
 - Runtime logs are in `out\build\win-amd64-release\logs\`.
 - After changing SDK codegen builders, delete the stale generated files to
-  force regeneration:
-  `Remove-Item generated\default\dantes_inferno_recomp.{7,95,23,94}.cpp -Force`
+  force regeneration. The codegen stamp does NOT track `rexglue.exe` as a
+  dependency, so you must delete the stamps AND the generated files, then
+  reconfigure CMake and rebuild:
+  ```powershell
+  Remove-Item generated\default\codegen.* -Force
+  Remove-Item generated\default\dantes_inferno_recomp.*.cpp -Force
+  Remove-Item generated\default\dantes_inferno_recomp.*.h -Force
+  Remove-Item generated\default\sources.cmake -Force
+  cmake --preset win-amd64-release -DREXSDK_DIR=thirdparty\rexglue-sdk
+  cmake --build out\build\win-amd64-release
+  ```
+- The SDK's PPC instruction test suite (`ppc_tests`) can be built and run
+  to verify codegen builder correctness:
+  ```powershell
+  cd thirdparty\rexglue-sdk
+  cmake --preset win-amd64 -DREXGLUE_BUILD_TESTS=ON
+  cmake --build out\build\win-amd64 --target ppc_tests --config Release
+  .\out\win-amd64\Release\ppc_tests.exe
+  ```
+
+## Save-point crash (in progress)
+
+The game crashes when saving at a save point. Runtime logs show:
+
+1. `Call to unresolved function at guest address 0x82611FB0 (returning)` —
+   repeated 5 times. The runtime no-ops on unresolved calls, which leaves
+   guest state uninitialized.
+2. `Unhandled guest access violation: read of guest 0x000001A4` — the actual
+   crash. Address `0x1A4` is a struct member offset from a null pointer,
+   a downstream consequence of the unresolved function not setting up state.
+
+**Fix applied (pending rebuild):** Added `0x82611FB0` to
+`dantes_inferno_manifest.toml` under `[entrypoint.functions]` so codegen
+generates a function stub at that address. The manifest already had nearby
+addresses (`0x82611F48`, `0x82611F98`) but was missing `0x82611FB0`.
+
+**Next steps:**
+1. Force codegen regeneration (delete `generated/default/codegen.*` and
+   `generated/default/dantes_inferno_recomp.*.cpp`).
+2. Reconfigure CMake and rebuild.
+3. Launch and test save-point again.
+4. If it still crashes, check logs for additional unresolved addresses and
+   add them to the manifest. The pattern of nearby unresolved addresses
+   (`0x82611F48`, `0x82611F98`, `0x82611FB0`) suggests a function table or
+   vtable in that region — more entries may be needed.
+
+## Asset extraction tool
+
+`tools/asset_tool.py` extracts and repacks game assets for upscaling. See
+`tools/ASSET_TOOL_README.md` for full documentation.
+
+```powershell
+# List archive contents
+python tools/asset_tool.py list game/bigfile0.viv
+
+# Full pipeline: extract + unpack STR + convert textures to PNG
+python tools/asset_tool.py extract game/bigfile0.viv output --full-pipeline
+
+# Extract just videos
+python tools/asset_tool.py extract game/bigfile0.viv output --type videos
+
+# Unpack/repack STR files
+python tools/asset_tool.py unpack-str input.str output_dir/
+python tools/asset_tool.py pack-str input_dir/ output.str
+
+# Convert textures (TG4D <-> DDS/PNG)
+python tools/asset_tool.py convert-texture tex.tg4d tex.png --tg4h tex.tg4h
+python tools/asset_tool.py make-texture upscaled.png out.tg4d --format dxt5
+
+# Pack BIG archive
+python tools/asset_tool.py pack-big input_dir/ output.viv
+```
+
+Dependencies: `pip install pillow texture2ddecoder`
+
+Formats supported: BIG/VIV (BIGH), STR (StreamSet), TG4D/TG4H (DXT1/DXT5),
+VP6 video, EAGM mesh (raw extraction). RefPack compression/decompression
+implemented in pure Python.
 
 ## Current status
 
@@ -122,6 +204,14 @@ If the SDK is re-cloned, these patches must be re-applied. The fixes are:
 - [x] VMX/AltiVec issue #75 resolved (v0.10.0 has full VMX support)
 - [x] VP6/Bink FMV corruption diagnosed and fixed (docs/vp6_fmv_corruption_fix.md)
 - [x] SDK patches submitted upstream (PR #426)
+- [x] Physics/collision bug fixed: vmsum3fp128 dot product mask reverted
+      from 0x7F to 0xEF (character was falling through map after cutscene)
+- [x] Save-point crash diagnosed: unresolved function at 0x82611FB0
+      (manifest edited, rebuild pending)
+- [x] Asset extraction tool built (tools/asset_tool.py): BIG/VIV parsing,
+      STR unpacking/packing, RefPack, TG4D/DXT texture conversion, VP6
+      extraction, EAGM mesh extraction
+- [ ] Rebuild game with 0x82611FB0 manifest entry and test save-point fix
 - [ ] Graphics quality cvars configured in OnPreSetup
 - [ ] MnK keybind defaults configured in OnPreSetup
 - [ ] DLC auto-install hook in OnPostSetup

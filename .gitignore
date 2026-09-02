@@ -74,3 +74,19 @@ test/headless_test_run.log
 tools/__pycache__/
 __pycache__/
 *.pyc
+
+# --- Launcher C# build output ---
+launcher/**/bin/
+launcher/**/obj/
+launcher/**/*.user
+launcher/**/*.suo
+launcher_test/
+launcher-release/
+
+# --- Source icon assets (keep ICO, ignore PNG source) ---
+!launcher/icon.ico
+!metadata/icon.ico
+metadata/icon.png
+
+# --- Third-party reference source (optional, not needed for runtime) ---
+tools/Gibbed.Visceral/

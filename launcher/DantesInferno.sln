@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInferno.Shared", "DantesInferno.Shared\Shared.csproj", "{B8F0C9A1-1234-5678-90AB-CDEF11111111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInfernoLauncher", "DantesInfernoLauncher\Launcher.csproj", "{B8F0C9A1-1234-5678-90AB-CDEF22222222}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInfernoInstaller", "DantesInfernoInstaller\Installer.csproj", "{B8F0C9A1-1234-5678-90AB-CDEF33333333}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8F0C9A1-1234-5678-90AB-CDEF11111111}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF11111111}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF11111111}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF11111111}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF22222222}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF22222222}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF22222222}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF22222222}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

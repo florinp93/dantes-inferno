@@ -210,7 +210,7 @@ namespace DantesInferno.Launcher
                 if (release.Version > localVersion)
                 {
                     string assetInfo = "";
-                    var asset = release.Assets.FirstOrDefault(a => a.Name.Equals("dantes_inferno.zip", StringComparison.OrdinalIgnoreCase));
+                    var asset = release.Assets.FirstOrDefault(a => a.Name.Equals("DantesInferno-Release.zip", StringComparison.OrdinalIgnoreCase));
                     if (asset != null)
                     {
                         assetInfo = $"\n\nDownload: {asset.BrowserDownloadUrl}";

@@ -33,7 +33,6 @@
                             <Button Content="EXIT" FontSize="14" Padding="10,5" Width="120" Margin="0,15,0,0" Click="ExitButton_Click" />
                         </StackPanel>
                         <StackPanel Grid.Row="2" Margin="0,10">
-                            <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="True" Margin="0,5" />
                             <TextBlock x:Name="PlayNoteText" Text="" FontSize="11" Opacity="0.7" Margin="0,5" />
                         </StackPanel>
                         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
@@ -76,6 +75,7 @@
                             <GroupBox Header="Controls">
                                 <StackPanel Margin="10">
                                     <CheckBox x:Name="ControllerFixCheck" Content="Use controller (Xbox / PlayStation controllers)" Margin="0,3" />
+                                    <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="False" Margin="0,3" />
                                 </StackPanel>
                             </GroupBox>
 

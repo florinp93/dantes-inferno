@@ -215,38 +215,49 @@ namespace DantesInferno.Installer
                 _worker.ReportProgress(0, "Preparing destination...");
                 Directory.CreateDirectory(_destination);
                 string gameDir = Path.Combine(_destination, "game");
-                if (Directory.Exists(gameDir))
+
+                // Only extract the ISO if game data is not already present.
+                bool needExtraction = !Directory.Exists(gameDir) ||
+                    !Directory.GetFiles(gameDir, "default.xex", SearchOption.AllDirectories).Any();
+                if (needExtraction)
                 {
-                    _worker.ReportProgress(5, "Removing old game data...");
-                    Directory.Delete(gameDir, true);
+                    if (Directory.Exists(gameDir))
+                    {
+                        _worker.ReportProgress(5, "Removing old game data...");
+                        try { Directory.Delete(gameDir, true); } catch { }
+                    }
+
+                    _worker.ReportProgress(10, "Extracting ISO to game folder (this may take a few minutes)...");
+                    string extractExe = GetPayloadFile("extract-xiso.exe");
+                    if (!File.Exists(extractExe))
+                        throw new FileNotFoundException("extract-xiso.exe was not found in the installer payload.");
+
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = extractExe,
+                        Arguments = $"-x -d \"{gameDir}\" -s \"{_isoPath}\"",
+                        WorkingDirectory = _destination,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                    };
+
+                    using (var process = Process.Start(psi))
+                    {
+                        process.OutputDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "FILE:" + ev.Data); };
+                        process.ErrorDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "ERR:" + ev.Data); };
+                        process.BeginOutputReadLine();
+                        process.BeginErrorReadLine();
+                        process.WaitForExit();
+
+                        if (process.ExitCode != 0)
+                            throw new InvalidOperationException("extract-xiso exited with code " + process.ExitCode);
+                    }
                 }
-
-                _worker.ReportProgress(10, "Extracting ISO to game folder (this may take a few minutes)...");
-                string extractExe = GetPayloadFile("extract-xiso.exe");
-                if (!File.Exists(extractExe))
-                    throw new FileNotFoundException("extract-xiso.exe was not found in the installer payload.");
-
-                var psi = new ProcessStartInfo
+                else
                 {
-                    FileName = extractExe,
-                    Arguments = $"-x -d \"{gameDir}\" -s \"{_isoPath}\"",
-                    WorkingDirectory = _destination,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                };
-
-                using (var process = Process.Start(psi))
-                {
-                    process.OutputDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "FILE:" + ev.Data); };
-                    process.ErrorDataReceived += (s, ev) => { if (!string.IsNullOrEmpty(ev.Data)) _worker.ReportProgress(0, "ERR:" + ev.Data); };
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-                    process.WaitForExit();
-
-                    if (process.ExitCode != 0)
-                        throw new InvalidOperationException("extract-xiso exited with code " + process.ExitCode);
+                    _worker.ReportProgress(45, "Game data already present, skipping extraction.");
                 }
 
                 _worker.ReportProgress(50, "Copying game files...");
@@ -263,28 +274,44 @@ namespace DantesInferno.Installer
                     Directory.CreateDirectory(Path.GetDirectoryName(target));
                     File.Copy(file, target, true);
                     index++;
-                    int percent = 50 + (int)(40.0 * index / Math.Max(1, filesToCopy.Length));
+                    int percent = 50 + (int)(35.0 * index / Math.Max(1, filesToCopy.Length));
                     _worker.ReportProgress(percent, $"Copied {relative}");
                 }
 
-                _worker.ReportProgress(90, "Writing default configuration...");
+                // Preserve existing settings, only update what's needed.
+                _worker.ReportProgress(88, "Updating configuration...");
                 string configPath = Path.Combine(_destination, "dantes_inferno.toml");
                 var config = GameConfig.Load(configPath);
+                // Always set the game data root and ROV path.
                 config.GameDataRoot = gameDir;
-                config.Resolution = "1080p";
                 config.RenderTargetPath = "rov";
-                config.SwapPostEffect = "none";
-                config.AnisotropicOverride = -1;
-                config.ResolutionScale = 1;
+                // Force logging off by default on install/update.
+                config.LogLevel = "off";
+                // Set sensible defaults only if not already configured.
+                if (string.IsNullOrEmpty(config.Resolution))
+                    config.Resolution = "1080p";
+                if (config.ResolutionScale < 1)
+                    config.ResolutionScale = 1;
+                if (string.IsNullOrEmpty(config.SwapPostEffect))
+                    config.SwapPostEffect = "none";
+                if (config.AnisotropicOverride < -1)
+                    config.AnisotropicOverride = -1;
                 config.VSync = true;
-                config.Native2xMsaa = false;
                 config.Fullscreen = true;
-                config.InputBackend = "sdl";
+                if (string.IsNullOrEmpty(config.InputBackend))
+                    config.InputBackend = "sdl";
                 config.Save();
 
-                GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse("0.2.0-alpha"));
+                // Write the version from the payload's version.txt.
+                string versionFile = GetPayloadFile("version.txt");
+                string versionStr = "0.3.1-alpha";
+                if (File.Exists(versionFile))
+                    versionStr = File.ReadAllText(versionFile).Trim();
+                string destVersionFile = Path.Combine(_destination, "version.txt");
+                File.WriteAllText(destVersionFile, versionStr + "\n");
+                GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse(versionStr));
 
-                RegisterInAddRemovePrograms(_destination);
+                RegisterInAddRemovePrograms(_destination, versionStr);
 
                 _worker.ReportProgress(100, "Installation complete.");
             }
@@ -367,7 +394,7 @@ namespace DantesInferno.Installer
             }
         }
 
-        private void RegisterInAddRemovePrograms(string installDir)
+        private void RegisterInAddRemovePrograms(string installDir, string version)
         {
             try
             {
@@ -376,7 +403,7 @@ namespace DantesInferno.Installer
                 {
                     if (key == null) return;
                     key.SetValue("DisplayName", "Dante's Inferno");
-                    key.SetValue("DisplayVersion", "0.2.0-alpha");
+                    key.SetValue("DisplayVersion", version);
                     key.SetValue("InstallLocation", installDir);
                     key.SetValue("DisplayIcon", Path.Combine(installDir, "DantesInfernoLauncher.exe") + ",0");
                     key.SetValue("UninstallString", Path.Combine(installDir, "uninstall.exe"));

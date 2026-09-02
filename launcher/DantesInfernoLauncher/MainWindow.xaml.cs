@@ -192,11 +192,11 @@ namespace DantesInferno.Launcher
                 return;
             }
 
-            // Save settings before launching
+            // Save settings before launching (silently, no dialog)
             SaveSettingsToConfig();
             _config.Save();
 
-            bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
+            bool loggingEnabled = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
 
             ClearOldLogs();
 

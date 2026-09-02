@@ -205,7 +205,7 @@ namespace DantesInferno
 
         public string LogLevel
         {
-            get { return this["log_level"] ?? "info"; }
+            get { return this["log_level"] ?? "off"; }
             set { this["log_level"] = value; }
         }
 
@@ -258,7 +258,7 @@ namespace DantesInferno
             MnkMouse = true;
             MnkSensitivity = 1.5;
             ResolutionScale = 1;
-            LogLevel = "info";
+            LogLevel = "off";
             FrameCap = FrameCapOption.VSync60;
         }
     }

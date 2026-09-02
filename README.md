@@ -18,8 +18,7 @@ built with the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
 
 ReXGlue converts Xbox 360 PowerPC XEX executables into portable C++ that runs
 natively on Windows (D3D12) and Linux (Vulkan) - no emulation, no JIT at
-runtime. This project contains the port configuration, custom hooks, and build
-scaffolding; the ReXGlue SDK itself lives under `thirdparty/`.
+runtime.
 
 ## 🤖 AI Usage Disclosure
 

@@ -126,7 +126,13 @@ namespace DantesInferno
 
         public override string ToString()
         {
-            string v = Major + "." + Minor + "." + Build + "." + Revision;
+            string v;
+            if (Revision > 0)
+                v = Major + "." + Minor + "." + Build + "." + Revision;
+            else if (Build > 0)
+                v = Major + "." + Minor + "." + Build;
+            else
+                v = Major + "." + Minor;
             if (!string.IsNullOrEmpty(Prerelease))
                 v += "-" + Prerelease;
             if (!string.IsNullOrEmpty(BuildMetadata))
@@ -142,7 +148,7 @@ namespace DantesInferno
 
     public static class GitHubUpdater
     {
-        private const string ApiUrl = "https://api.github.com/repos/florinp93/dantes-inferno/releases";
+        private const string ApiUrl = "https://api.github.com/repos/florinp93/hells-gate-recomp/releases";
 
         static GitHubUpdater()
         {

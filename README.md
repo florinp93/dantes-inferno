@@ -21,6 +21,18 @@ natively on Windows (D3D12) and Linux (Vulkan) - no emulation, no JIT at
 runtime. This project contains the port configuration, custom hooks, and build
 scaffolding; the ReXGlue SDK itself lives under `thirdparty/`.
 
+## 🤖 AI Usage Disclosure
+
+Transparency and integrity are important to this project. Artificial Intelligence (AI) tools were utilized as part of the development and maintenance workflow, strictly serving as an assistant to handle repetitive, time-consuming, and low-level tasks. 
+
+### How AI Was Used:
+* **Documentation:** Generating initial drafts, organizing notes, and structuring documentation to keep project progress up to date.
+* **Research & Exploration:** Investigating APIs, syntax references, and conceptual troubleshooting.
+* **Git Workflows:** Assisting with routine commit descriptions, repository maintenance tasks, and boilerplate structuring.
+
+### Human Oversight:
+While AI accelerated the auxiliary workflow, all core architectural decisions, advanced problem-solving, code implementation, and final reviews were entirely human-driven. The AI served to eliminate friction, allowing focus on high-level logic and feature development.
+
 ## Project layout
 
 ```

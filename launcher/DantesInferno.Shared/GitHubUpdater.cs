@@ -142,7 +142,7 @@ namespace DantesInferno
 
     public static class GitHubUpdater
     {
-        private const string ApiUrl = "https://api.github.com/repos/florinp93/dantes-inferno/releases/latest";
+        private const string ApiUrl = "https://api.github.com/repos/florinp93/dantes-inferno/releases";
 
         public static ReleaseInfo CheckLatest(string token = null)
         {
@@ -154,8 +154,15 @@ namespace DantesInferno
 
                 string json = client.DownloadString(ApiUrl);
                 var serializer = new JavaScriptSerializer();
-                var raw = serializer.Deserialize<Dictionary<string, object>>(json);
-                return MapRelease(raw);
+                var releases = serializer.Deserialize<List<object>>(json);
+                if (releases == null || releases.Count == 0)
+                    throw new InvalidOperationException("No releases found.");
+
+                var first = releases[0] as Dictionary<string, object>;
+                if (first == null)
+                    throw new InvalidOperationException("Unexpected release list format.");
+
+                return MapRelease(first);
             }
         }
 

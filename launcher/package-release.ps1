@@ -47,6 +47,10 @@ Copy-Item (Join-Path $root "icon.ico") $distDir -Force
 Copy-Item (Join-Path $root "banner.jpg") $distDir -Force
 Copy-Item (Join-Path $root "icon.ico") (Join-Path $OutputDir "icon.ico") -Force
 
+Write-Host "Copying uninstaller..."
+$uninstallerBin = Join-Path $root "DantesInfernoUninstaller\bin\$Configuration"
+Copy-Item (Join-Path $uninstallerBin "uninstall.exe") $distDir -Force
+
 $installerBin = Join-Path $root "DantesInfernoInstaller\bin\$Configuration"
 $installerExe = Join-Path $OutputDir "DantesInfernoInstaller.exe"
 Copy-Item (Join-Path $installerBin "DantesInfernoInstaller.exe") $installerExe -Force

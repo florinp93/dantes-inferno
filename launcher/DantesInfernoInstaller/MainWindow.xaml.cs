@@ -282,7 +282,9 @@ namespace DantesInferno.Installer
                 config.InputBackend = "sdl";
                 config.Save();
 
-                GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse("0.1.0-alpha"));
+                GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse("0.2.0-alpha"));
+
+                RegisterInAddRemovePrograms(_destination);
 
                 _worker.ReportProgress(100, "Installation complete.");
             }
@@ -363,6 +365,28 @@ namespace DantesInferno.Installer
             {
                 MessageBox.Show("Could not create desktop shortcut:\n" + ex.Message, "Shortcut Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private void RegisterInAddRemovePrograms(string installDir)
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Uninstall\DantesInferno"))
+                {
+                    if (key == null) return;
+                    key.SetValue("DisplayName", "Dante's Inferno");
+                    key.SetValue("DisplayVersion", "0.2.0-alpha");
+                    key.SetValue("InstallLocation", installDir);
+                    key.SetValue("DisplayIcon", Path.Combine(installDir, "DantesInfernoLauncher.exe") + ",0");
+                    key.SetValue("UninstallString", Path.Combine(installDir, "uninstall.exe"));
+                    key.SetValue("NoModify", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                    key.SetValue("NoRepair", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                    key.SetValue("Publisher", "florinp93");
+                    key.SetValue("URLInfoAbout", "https://github.com/florinp93/dantes-inferno");
+                }
+            }
+            catch { }
         }
     }
 }

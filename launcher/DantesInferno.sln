@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInfernoLauncher", "Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInfernoInstaller", "DantesInfernoInstaller\Installer.csproj", "{B8F0C9A1-1234-5678-90AB-CDEF33333333}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DantesInfernoUninstaller", "DantesInfernoUninstaller\Uninstaller.csproj", "{B8F0C9A1-1234-5678-90AB-CDEF44444444}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -26,6 +28,10 @@ Global
 		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
 		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{B8F0C9A1-1234-5678-90AB-CDEF33333333}.Release|AnyCPU.Build.0 = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF44444444}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF44444444}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF44444444}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{B8F0C9A1-1234-5678-90AB-CDEF44444444}.Release|AnyCPU.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

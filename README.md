@@ -1,20 +1,12 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Dante's Inferno - PC Recomp Project" width="100%" />
-</p>
-
-<p align="center">
-  <a href="https://ko-fi.com/zerkiller">
-    <img src="https://img.shields.io/badge/Ko--Fi-Buy%20me%20a%20coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
-  </a>
-    <a href="https://discord.gg/mjGfv7ysG8">
-    <img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
-  </a>
-  <a href="https://github.com/florinp93">
-    <img src="https://img.shields.io/badge/Other-Projects-0AB4F5?style=for-the-badge&logo=github&logoColor=white" alt="Other Projects" />
-  </a>
-</p>
-
 # Dante's Inferno - Xbox 360 to PC Port (ReXGlue)
+
+<p align="center">
+  <img src="assets/fan_artwork.png" alt="Dante's Inferno - Fan Artwork" width="256" />
+</p>
+
+<p align="center">
+  <em>Fan artwork by <a href="https://www.deviantart.com/pooterman">POOTERMAN</a> (<a href="https://github.com/florinp93/hells-gate-recomp/issues/12">#12</a>)</em>
+</p>
 
 A static recompilation port of **Dante's Inferno** (Xbox 360) to native PC,
 built with the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
@@ -22,6 +14,18 @@ built with the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
 ReXGlue converts Xbox 360 PowerPC XEX executables into portable C++ that runs
 natively on Windows (D3D12) and Linux (Vulkan) - no emulation, no JIT at
 runtime.
+
+<p align="center">
+  <a href="https://ko-fi.com/zerkiller">
+    <img src="https://img.shields.io/badge/Ko--Fi-Buy%20me%20a%20coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
+  </a>
+  <a href="https://discord.gg/mjGfv7ysG8">
+    <img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
+  </a>
+  <a href="https://github.com/florinp93">
+    <img src="https://img.shields.io/badge/Other-Projects-0AB4F5?style=for-the-badge&logo=github&logoColor=white" alt="Other Projects" />
+  </a>
+</p>
 
 ## 🤖 AI Usage Disclosure
 

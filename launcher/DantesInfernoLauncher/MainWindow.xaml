@@ -80,12 +80,14 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Text="Button glyphs:" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                        <ComboBox x:Name="GlyphFamilyCombo" Grid.Column="1" SelectedIndex="0" ToolTip="Select controller button glyph style">
+                                        <ComboBox x:Name="GlyphFamilyCombo" Grid.Column="1" SelectedIndex="0" IsEnabled="False" ToolTip="Coming soon">
                                             <ComboBoxItem Content="Xbox 360" />
                                             <ComboBoxItem Content="PlayStation" />
                                         </ComboBox>
+                                        <TextBlock Grid.Column="2" Text="Coming soon" FontSize="11" FontStyle="Italic" Opacity="0.5" VerticalAlignment="Center" Margin="8,0,0,0" />
                                     </Grid>
 
                                     <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="False" Margin="0,3" />

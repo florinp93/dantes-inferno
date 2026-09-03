@@ -130,13 +130,6 @@ namespace DantesInferno.Launcher
 
         private void SaveSettingsToConfig()
         {
-            // Ensure game_data_root is always in the config dictionary so it
-            // gets written to dantes_inferno.toml on Save(). The game reads
-            // this from the config file, not the command line, to avoid path
-            // quoting issues with special characters. (GitHub issue #1)
-            if (string.IsNullOrWhiteSpace(_config.GameDataRoot))
-                _config.GameDataRoot = PathHelper.GetGameDataPath(_installDir);
-
             // Resolution scale
             int scaleIdx = ResScaleCombo.SelectedIndex;
             if (scaleIdx < 0) scaleIdx = 0;
@@ -199,17 +192,8 @@ namespace DantesInferno.Launcher
                 return;
             }
 
-            // Save settings before launching (silently, no dialog).
-            // This also ensures game_data_root is written to dantes_inferno.toml,
-            // which the game reads via the cvar system's LoadConfig. We do NOT
-            // pass --game_data_root on the command line because paths containing
-            // special characters (e.g. apostrophes in "Dante's Inferno") get
-            // mangled when Wine/Proton reconstructs the command line for Linux
-            // process creation. The config file uses TOML quoting which handles
-            // such characters correctly. (GitHub issue #1)
+            // Save settings before launching (silently, no dialog)
             SaveSettingsToConfig();
-            if (string.IsNullOrWhiteSpace(_config.GameDataRoot))
-                _config.GameDataRoot = gameData;
             _config.Save();
 
             bool loggingEnabled = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
@@ -217,6 +201,7 @@ namespace DantesInferno.Launcher
             ClearOldLogs();
 
             var args = new List<string>();
+            args.Add(string.Format("--game_data_root=\"{0}\"", gameData));
 
             // Use ROV (rasterizer-ordered views) for correct alpha/transparency
             // rendering. The host RTV path has known issues with alpha-blended

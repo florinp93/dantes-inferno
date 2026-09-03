@@ -195,5 +195,11 @@ namespace DantesInferno
             get { return this["log_level"] ?? "off"; }
             set { this["log_level"] = value; }
         }
+
+        public bool PlayStationGlyphs
+        {
+            get { return Get("playstation_glyphs", false); }
+            set { Set("playstation_glyphs", value); }
+        }
     }
 }

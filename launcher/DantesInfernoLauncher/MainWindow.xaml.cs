@@ -93,6 +93,9 @@ namespace DantesInferno.Launcher
             // Controller
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
 
+            PlayStationGlyphsCheck.IsChecked = _config.PlayStationGlyphs;
+            GlyphFamilyCombo.SelectedIndex = _config.PlayStationGlyphs ? 1 : 0;
+
             // Logging
             LoggingEnabledCheck.IsChecked = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
         }
@@ -154,6 +157,8 @@ namespace DantesInferno.Launcher
 
             // Controller
             _config.InputBackend = (ControllerFixCheck.IsChecked ?? false) ? "sdl" : "none";
+
+            _config.PlayStationGlyphs = GlyphFamilyCombo.SelectedIndex == 1;
 
             // Logging
             bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
@@ -223,6 +228,9 @@ namespace DantesInferno.Launcher
 
             // Logging
             args.Add(loggingEnabled ? "--log_level=info" : "--log_level=off");
+
+            if (GlyphFamilyCombo.SelectedIndex == 1)
+                args.Add("--glyph_family=playstation");
 
             string arguments = string.Join(" ", args);
             PlayNoteText.Text = "Launching with " + (scale > 1 ? scale + "x resolution" : "original resolution") + "...";

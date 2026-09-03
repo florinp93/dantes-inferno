@@ -16,6 +16,7 @@
 
 #include <array>
 #include <chrono>
+#include <cstring>
 
 // Time scalar cvar: 1.0 = normal speed, 50.0 = 50x fast-forward for FMVs.
 // Can be set from the console (backtick key) or toggled with F2.
@@ -25,6 +26,9 @@ REXCVAR_DEFINE_DOUBLE(time_scalar, 1.0, "Gameplay",
 // Toggle for the FPS overlay.
 REXCVAR_DEFINE_BOOL(show_fps_overlay, false, "UI",
                     "Show FPS and frametime overlay (top-left corner)");
+
+REXCVAR_DEFINE_STRING(glyph_family, "auto", "UI",
+                      "Button glyph family: auto, xbox, or playstation");
 
 // Simple FPS + frametime overlay dialog, always visible in top-left corner.
 // Measures actual guest frame rate (game frames), not host present rate.

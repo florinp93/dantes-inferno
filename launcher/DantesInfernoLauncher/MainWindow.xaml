@@ -75,6 +75,23 @@
                             <GroupBox Header="Controls">
                                 <StackPanel Margin="10">
                                     <CheckBox x:Name="ControllerFixCheck" Content="Use controller (Xbox / PlayStation controllers)" Margin="0,3" />
+
+                                    <Grid Margin="0,8,0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Button glyphs:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <ComboBox x:Name="GlyphFamilyCombo" Grid.Column="1" IsEnabled="False" SelectedIndex="0" ToolTip="Select controller button glyph style">
+                                            <ComboBoxItem Content="Xbox 360" />
+                                            <ComboBoxItem Content="PlayStation" />
+                                        </ComboBox>
+                                        <Border Grid.Column="1" Background="#0078D7" CornerRadius="3" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="12,4" IsHitTestVisible="True">
+                                            <TextBlock Text="Coming soon" FontWeight="Bold" Foreground="White" FontSize="11" />
+                                        </Border>
+                                    </Grid>
+
+                                    <CheckBox x:Name="PlayStationGlyphsCheck" Content="Use PlayStation button glyphs (DualSense)" IsChecked="False" Margin="0,3" Visibility="Collapsed" ToolTip="Replaces Xbox 360 button prompts (A/B/X/Y) with PlayStation equivalents (Cross/Circle/Square/Triangle)" />
                                     <CheckBox x:Name="LoggingEnabledCheck" Content="Enable logging (for crash reports)" IsChecked="False" Margin="0,3" />
                                 </StackPanel>
                             </GroupBox>

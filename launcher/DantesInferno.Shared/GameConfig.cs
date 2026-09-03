@@ -7,13 +7,6 @@ using System.Text;
 
 namespace DantesInferno
 {
-    public enum FrameCapOption
-    {
-        VSync60,
-        VSync120,
-        Unlimited
-    }
-
     public class GameConfig
     {
         private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -161,12 +154,6 @@ namespace DantesInferno
             set { Set("vsync", value); }
         }
 
-        public bool Native2xMsaa
-        {
-            get { return Get("native_2x_msaa", false); }
-            set { Set("native_2x_msaa", value); }
-        }
-
         public bool Fullscreen
         {
             get { return Get("fullscreen", true); }
@@ -207,59 +194,6 @@ namespace DantesInferno
         {
             get { return this["log_level"] ?? "off"; }
             set { this["log_level"] = value; }
-        }
-
-        public double VideoModeRefreshRate
-        {
-            get { return Get("video_mode_refresh_rate", 60.0); }
-            set { Set("video_mode_refresh_rate", value); }
-        }
-
-        public FrameCapOption FrameCap
-        {
-            get
-            {
-                if (!VSync) return FrameCapOption.Unlimited;
-                if (VideoModeRefreshRate >= 120.0) return FrameCapOption.VSync120;
-                return FrameCapOption.VSync60;
-            }
-            set
-            {
-                switch (value)
-                {
-                    case FrameCapOption.VSync60:
-                        VSync = true;
-                        VideoModeRefreshRate = 60.0;
-                        break;
-                    case FrameCapOption.VSync120:
-                        VSync = true;
-                        VideoModeRefreshRate = 120.0;
-                        break;
-                    case FrameCapOption.Unlimited:
-                        VSync = false;
-                        VideoModeRefreshRate = 60.0;
-                        break;
-                }
-            }
-        }
-
-        public void ApplyRecommendedPreset()
-        {
-            Resolution = "1080p";
-            AnisotropicOverride = -1;
-            SwapPostEffect = "none";
-            PresentEffect = "bilinear";
-            VSync = true;
-            Native2xMsaa = false;
-            Fullscreen = true;
-            RenderTargetPath = "rov";
-            InputBackend = "sdl";
-            MnkMode = true;
-            MnkMouse = true;
-            MnkSensitivity = 1.5;
-            ResolutionScale = 1;
-            LogLevel = "off";
-            FrameCap = FrameCapOption.VSync60;
         }
     }
 }

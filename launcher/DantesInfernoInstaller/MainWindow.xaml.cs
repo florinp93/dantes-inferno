@@ -85,9 +85,8 @@ namespace DantesInferno.Installer
                     return tempRoot;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.WriteLine("Payload extraction failed: " + ex.Message);
                 return null;
             }
         }

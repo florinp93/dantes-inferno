@@ -217,36 +217,10 @@ class DantesInfernoApp : public rex::ReXApp {
     rex::cvar::SetFlagByName("keybind_start", "Escape");
   }
 
-  void OnPostLoadXexImage() override {
-    // Patch: zero out the fiber-switch callback at guest 0x82B101E4.
-    //
-    // sub_82701240 is a setjmp-like context-save used by the save system.
-    // It loads a function pointer from 0x82B101E4; if non-zero it calls that
-    // function and returns immediately WITHOUT saving the context. The XEX
-    // ships a no-op blr stub (sub_821EA208) at that address, so the "save"
-    // returns with r3 still holding the non-zero buffer address. The caller
-    // (sub_8267ACC8) interprets the non-zero return as an error and aborts,
-    // leaving the save object null and eventually crashing.
-    //
-    // Zeroing the pointer makes sub_82701240 fall through to the normal
-    // context-save path, which sets r3=0 (success) and returns.
-    //
-    // NOTE: OnPostLoadXexImage is called before relocations are applied,
-    // so the value is still 0 here. The actual write of 0x821EA208 happens
-    // during module launch. We patch it in OnPreLaunchModule instead.
-  }
-
   void OnPreLaunchModule() override {
-    // By now the module is launched, relocations are applied, and the
-    // fiber-switch callback at 0x82B101E4 has been set to 0x821EA208
-    // (a no-op blr stub). Zero it out so sub_82701240 does the normal
-    // context save and returns success.
     uint8_t* membase = runtime()->memory()->virtual_membase();
     auto* ptr = reinterpret_cast<uint32_t*>(membase + 0x82B101E4);
-    REXLOG_INFO("OnPreLaunchModule: ptr={:p}, old value=0x{:08X}",
-                (void*)ptr, *ptr);
     *ptr = 0u;
-    REXLOG_INFO("OnPreLaunchModule: patched 0x82B101E4 to 0, new value=0x{:08X}", *ptr);
   }
 
   void OnPostSetup() override {

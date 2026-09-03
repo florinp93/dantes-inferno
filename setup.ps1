@@ -34,6 +34,14 @@ Write-Host "Initializing SDK submodules (this can take a while) ..."
 git -C $sdkDir submodule update --init --recursive --depth 1
 if ($LASTEXITCODE -ne 0) { throw "submodule init failed" }
 
+# --- Apply local SDK patches -------------------------------------------------
+$applySdkPatches = Join-Path $root "patches\apply_sdk_patches.ps1"
+if (Test-Path $applySdkPatches) {
+    Write-Host "Applying local SDK patches ..."
+    & $applySdkPatches
+    if ($LASTEXITCODE -ne 0) { throw "SDK patch application failed" }
+}
+
 Write-Host ""
 Write-Host "Setup complete." -ForegroundColor Green
 Write-Host "Next steps:"
@@ -41,3 +49,4 @@ Write-Host "  1. Extract your Xbox 360 ISO into .\game\ (entrypoint at game\defa
 Write-Host "  2. Build the SDK CLI:  cmake --preset win-amd64-release -DREXSDK_DIR=thirdparty\rexglue-sdk ; cmake --build out\build\win-amd64-release --target rexglue"
 Write-Host "  3. Regenerate SDK-managed files:  rexglue init --force --project_name dantes_inferno --project_root . --xex_path game\default.xex --game_root game"
 Write-Host "  4. Configure & build the port:    cmake --preset win-amd64-release -DREXSDK_DIR=thirdparty\rexglue-sdk ; cmake --build out\build\win-amd64-release"
+Write-Host "  5. Apply generated code patches:  python patches\generated\apply_generated_patches.py"

@@ -19,6 +19,11 @@ the ReXGlue SDK (v0.10.0). ReXGlue translates PowerPC XEX -> C++ ahead of time.
 - `tools/asset_tool.py` - asset extraction/packing tool (BIG/STR/TG4D/VP6)
 - `tools/ASSET_TOOL_README.md` - asset tool documentation
 - `tools/Gibbed.Visceral/` - format reference source (gitignored, Zlib license)
+- `patches/` - local patches for SDK and generated code (tracked in git)
+  - `patches/sdk/rexglue-sdk-v0.10.0.patch` - all SDK modifications
+  - `patches/apply_sdk_patches.ps1` - applies SDK patches after clone
+  - `patches/generated/apply_generated_patches.py` - applies fiber/setjmp/longjmp
+    edits to generated code after codegen (must be re-run after each regen)
 
 ## Build commands (Windows)
 
@@ -121,6 +126,7 @@ If the SDK is re-cloned, these patches must be re-applied. The fixes are:
   Remove-Item generated\default\sources.cmake -Force
   cmake --preset win-amd64-release -DREXSDK_DIR=thirdparty\rexglue-sdk
   cmake --build out\build\win-amd64-release
+  python patches\generated\apply_generated_patches.py
   ```
 - The SDK's PPC instruction test suite (`ppc_tests`) can be built and run
   to verify codegen builder correctness:
@@ -131,31 +137,20 @@ If the SDK is re-cloned, these patches must be re-applied. The fixes are:
   .\out\win-amd64\Release\ppc_tests.exe
   ```
 
-## Save-point crash (in progress)
+## Save system
 
-The game crashes when saving at a save point. Runtime logs show:
+The save system uses a setjmp/longjmp pair that requires C setjmp/longjmp
+to unwind the C++ call stack. See `src/dantes_inferno_hooks.h` for the
+fiber support functions and `docs/code_changes.md` for full details.
 
-1. `Call to unresolved function at guest address 0x82611FB0 (returning)` —
-   repeated 5 times. The runtime no-ops on unresolved calls, which leaves
-   guest state uninitialized.
-2. `Unhandled guest access violation: read of guest 0x000001A4` — the actual
-   crash. Address `0x1A4` is a struct member offset from a null pointer,
-   a downstream consequence of the unresolved function not setting up state.
-
-**Fix applied (pending rebuild):** Added `0x82611FB0` to
-`dantes_inferno_manifest.toml` under `[entrypoint.functions]` so codegen
-generates a function stub at that address. The manifest already had nearby
-addresses (`0x82611F48`, `0x82611F98`) but was missing `0x82611FB0`.
-
-**Next steps:**
-1. Force codegen regeneration (delete `generated/default/codegen.*` and
-   `generated/default/dantes_inferno_recomp.*.cpp`).
-2. Reconfigure CMake and rebuild.
-3. Launch and test save-point again.
-4. If it still crashes, check logs for additional unresolved addresses and
-   add them to the manifest. The pattern of nearby unresolved addresses
-   (`0x82611F48`, `0x82611F98`, `0x82611FB0`) suggests a function table or
-   vtable in that region — more entries may be needed.
+Key components:
+- `[[midasm_hook]]` in manifest injects `ZeroFiberSwitchCallback()` at
+  `sub_82701240` (guest setjmp)
+- `OnPreLaunchModule` zeroes the fiber-switch callback at `0x82B101E4`
+- Manual generated-code edits in `.24`, `.38`, `.45`, `.70` add C
+  setjmp/longjmp calls (lost on codegen regen, must be re-applied)
+- `XUserFindUsers` handler in `xlivebase_app.cpp` returns success to
+  prevent null-pointer crash when loading saves
 
 ## Asset extraction tool
 
@@ -206,14 +201,13 @@ implemented in pure Python.
 - [x] SDK patches submitted upstream (PR #426)
 - [x] Physics/collision bug fixed: vmsum3fp128 dot product mask reverted
       from 0x7F to 0xEF (character was falling through map after cutscene)
-- [x] Save-point crash diagnosed: unresolved function at 0x82611FB0
-      (manifest edited, rebuild pending)
+- [x] Save system fixed: fiber/setjmp/longjmp support, midasm_hook,
+      XUserFindUsers handler, OnPreLaunchModule patch
 - [x] Asset extraction tool built (tools/asset_tool.py): BIG/VIV parsing,
       STR unpacking/packing, RefPack, TG4D/DXT texture conversion, VP6
       extraction, EAGM mesh extraction
-- [ ] Rebuild game with 0x82611FB0 manifest entry and test save-point fix
-- [ ] Graphics quality cvars configured in OnPreSetup
-- [ ] MnK keybind defaults configured in OnPreSetup
+- [x] Graphics quality cvars configured in OnPreSetup
+- [x] MnK keybind defaults configured in OnPreSetup
 - [ ] DLC auto-install hook in OnPostSetup
 - [ ] Ultrawide projection hook (requires RE of generated code)
 - [ ] Button glyph replacement (requires RE of generated code)

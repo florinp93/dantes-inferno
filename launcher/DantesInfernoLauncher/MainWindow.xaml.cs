@@ -95,11 +95,6 @@ namespace DantesInferno.Launcher
 
             // Logging
             LoggingEnabledCheck.IsChecked = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
-
-            // Frame rate — disabled, game runs at hardcoded 60 FPS.
-            // Re-enable if the game's internal frame rate is patched.
-            // FrameCapCombo.ItemsSource = new List<string> { "60 FPS (VSync On)", "120 FPS (VSync On)", "Unlimited (VSync Off)" };
-            // FrameCapCombo.SelectedIndex = (int)_config.FrameCap;
         }
 
         private void RefreshPlayStatus()
@@ -163,11 +158,6 @@ namespace DantesInferno.Launcher
             // Logging
             bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
             _config.LogLevel = loggingEnabled ? "info" : "off";
-
-            // Frame rate — disabled, game runs at hardcoded 60 FPS.
-            // int frameIdx = FrameCapCombo.SelectedIndex;
-            // if (frameIdx >= 0)
-            //     _config.FrameCap = (FrameCapOption)frameIdx;
         }
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
@@ -221,24 +211,11 @@ namespace DantesInferno.Launcher
             if (_config.AnisotropicOverride >= 0)
                 args.Add(string.Format("--anisotropic_override={0}", _config.AnisotropicOverride));
 
-            // VSync / frame rate — game runs at hardcoded 60 FPS.
+            // VSync — game runs at hardcoded 60 FPS.
             // Always enable host VSync for smooth, tear-free frame pacing.
-            // Re-enable the frame rate options below if the game's internal
-            // frame rate is patched to support >60 FPS.
             args.Add("--vsync=true");
             args.Add("--d3d12_host_vsync=true");
             args.Add("--video_mode_refresh_rate=60");
-            // if (_config.VSync)
-            // {
-            //     args.Add("--vsync=true");
-            //     args.Add("--d3d12_host_vsync=true");
-            //     args.Add(string.Format("--video_mode_refresh_rate={0}", _config.VideoModeRefreshRate));
-            // }
-            // else
-            // {
-            //     args.Add("--vsync=false");
-            //     args.Add("--d3d12_host_vsync=false");
-            // }
 
             // Input
             if (_config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase))
@@ -350,7 +327,6 @@ namespace DantesInferno.Launcher
             _config.VSync = true;
             _config.Fullscreen = true;
             _config.InputBackend = "sdl";
-            // _config.FrameCap = FrameCapOption.VSync60; // Disabled, game is 60 FPS
             PopulateControls();
             MessageBox.Show("Recommended settings applied. Click Save Settings to keep them.", "Recommended",
                 MessageBoxButton.OK, MessageBoxImage.Information);

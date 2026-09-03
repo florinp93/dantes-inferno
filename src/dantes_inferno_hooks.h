@@ -34,6 +34,18 @@ inline thread_local jmp_buf g_fiber_jmp_buf;
 inline thread_local uint32_t g_setjmp_ctx_addr = 0;
 inline thread_local uint32_t g_longjmp_return_value = 0;
 
+// Called from sub_82701240 (guest setjmp) to save the C++ stack position.
+// Saves the guest context buffer address for later restore.
+// Returns 0 on first call, non-zero when returning from longjmp.
+inline int FiberSetjmp(uint32_t ctx_addr) {
+  g_setjmp_ctx_addr = ctx_addr;
+  int ret = setjmp(g_fiber_jmp_buf);
+  if (ret != 0) {
+    REXLOG_INFO("FIBER: setjmp returning from longjmp (ret={})", ret);
+  }
+  return ret;
+}
+
 // Called by sub_82700CE0 (guest longjmp) to unwind the C++ stack.
 // Saves the return value and calls C longjmp.
 inline void FiberLongjmp(uint32_t return_value) {

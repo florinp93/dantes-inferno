@@ -148,7 +148,7 @@ namespace DantesInferno
 
     public static class GitHubUpdater
     {
-        private const string ApiUrl = "https://api.github.com/repos/florinp93/hells-gate-recomp/releases";
+        private const string ApiUrl = "https://api.github.com/repos/florinp93/dantes-inferno/releases";
 
         static GitHubUpdater()
         {
@@ -197,15 +197,6 @@ namespace DantesInferno
             string versionPath = PathHelper.GetVersionPath(installDirectory);
             Directory.CreateDirectory(Path.GetDirectoryName(versionPath) ?? installDirectory);
             File.WriteAllText(versionPath, version.ToString());
-        }
-
-        public static void DownloadFile(string url, string destination)
-        {
-            using (var client = new WebClient())
-            {
-                client.Headers["User-Agent"] = "DantesInfernoLauncher/1.0";
-                client.DownloadFile(url, destination);
-            }
         }
 
         private static ReleaseInfo MapRelease(Dictionary<string, object> raw)

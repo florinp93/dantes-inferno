@@ -199,14 +199,39 @@ namespace DantesInferno
             File.WriteAllText(versionPath, version.ToString());
         }
 
+        public static string DownloadAsset(ReleaseAsset asset, string destDir,
+            Action<long, long> progress = null)
+        {
+            if (asset == null || string.IsNullOrEmpty(asset.BrowserDownloadUrl))
+                throw new InvalidOperationException("Asset has no download URL.");
+
+            Directory.CreateDirectory(destDir);
+            string destPath = Path.Combine(destDir, asset.Name ?? "download.bin");
+
+            using (var client = new WebClient())
+            {
+                client.Headers["User-Agent"] = "DantesInfernoLauncher/1.0";
+
+                if (progress != null)
+                {
+                    client.DownloadProgressChanged += (s, e) =>
+                        progress(e.BytesReceived, e.TotalBytesToReceive);
+                }
+
+                client.DownloadFile(asset.BrowserDownloadUrl, destPath);
+            }
+
+            return destPath;
+        }
+
         private static ReleaseInfo MapRelease(Dictionary<string, object> raw)
         {
             var info = new ReleaseInfo
             {
-                TagName = raw.GetValueOrDefault("tag_name") as string,
-                Name = raw.GetValueOrDefault("name") as string,
-                Body = raw.GetValueOrDefault("body") as string,
-                HtmlUrl = raw.GetValueOrDefault("html_url") as string,
+                TagName = raw.GetValueOrDefault("tag_name"),
+                Name = raw.GetValueOrDefault("name"),
+                Body = raw.GetValueOrDefault("body"),
+                HtmlUrl = raw.GetValueOrDefault("html_url"),
             };
 
             if (raw.TryGetValue("prerelease", out var pre) && pre is bool b)
@@ -220,8 +245,8 @@ namespace DantesInferno
                     {
                         info.Assets.Add(new ReleaseAsset
                         {
-                            Name = asset.GetValueOrDefault("name") as string,
-                            BrowserDownloadUrl = asset.GetValueOrDefault("browser_download_url") as string
+                            Name = asset.GetValueOrDefault("name"),
+                            BrowserDownloadUrl = asset.GetValueOrDefault("browser_download_url")
                         });
                     }
                 }

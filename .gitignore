@@ -93,3 +93,9 @@ metadata/icon.png
 
 # --- Third-party reference source (optional, not needed for runtime) ---
 tools/Gibbed.Visceral/
+
+# --- Inno Setup script (not tracked) ---
+launcher/installer.iss
+
+# --- Test launcher dir ---
+test-launcher/

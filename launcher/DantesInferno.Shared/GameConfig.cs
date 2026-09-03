@@ -142,12 +142,6 @@ namespace DantesInferno
             set { this["swap_post_effect"] = value; }
         }
 
-        public string PresentEffect
-        {
-            get { return this["present_effect"] ?? "bilinear"; }
-            set { this["present_effect"] = value; }
-        }
-
         public bool VSync
         {
             get { return Get("vsync", true); }
@@ -172,34 +166,16 @@ namespace DantesInferno
             set { this["input_backend"] = value; }
         }
 
-        public bool MnkMode
+        public string GlyphFamily
         {
-            get { return Get("mnk_mode", true); }
-            set { Set("mnk_mode", value); }
-        }
-
-        public bool MnkMouse
-        {
-            get { return Get("mnk_mouse", true); }
-            set { Set("mnk_mouse", value); }
-        }
-
-        public double MnkSensitivity
-        {
-            get { return Get("mnk_sensitivity", 1.5); }
-            set { Set("mnk_sensitivity", value); }
+            get { return this["glyph_family"] ?? "auto"; }
+            set { this["glyph_family"] = value; }
         }
 
         public string LogLevel
         {
             get { return this["log_level"] ?? "off"; }
             set { this["log_level"] = value; }
-        }
-
-        public bool PlayStationGlyphs
-        {
-            get { return Get("playstation_glyphs", false); }
-            set { Set("playstation_glyphs", value); }
         }
     }
 }

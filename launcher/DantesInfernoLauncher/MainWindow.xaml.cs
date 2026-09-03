@@ -23,6 +23,53 @@ namespace DantesInferno.Launcher
             LoadConfiguration();
             PopulateControls();
             RefreshPlayStatus();
+            CheckForUpdatesOnStartup();
+        }
+
+        private void CheckForUpdatesOnStartup()
+        {
+            Task.Factory.StartNew(new Action(() =>
+            {
+                ReleaseInfo release = null;
+                try { release = GitHubUpdater.CheckLatest(); }
+                catch { return; }
+
+                if (release == null)
+                    return;
+
+                var localVersion = GitHubUpdater.GetLocalVersion(_installDir);
+                if (release.Version <= localVersion)
+                    return;
+
+                var asset = release.Assets.FirstOrDefault(
+                    a => a.Name.Equals("DantesInfernoInstaller.exe",
+                        StringComparison.OrdinalIgnoreCase));
+                if (asset == null)
+                    return;
+
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    _pendingUpdate = release;
+                    DownloadUpdateButton.Visibility = Visibility.Visible;
+                    UpdateStatusText.Text =
+                        $"Update available: {release.TagName} (you have {localVersion})\n\n" +
+                        $"{release.Name}\n\nClick \"Download & Install\" to update.";
+
+                    var result = MessageBox.Show(this,
+                        $"A new version is available: {release.TagName}\n" +
+                        $"You currently have: {localVersion}\n\n" +
+                        $"{release.Name}\n\n" +
+                        "Would you like to download and install the update now?",
+                        "Update Available",
+                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        MainTabControl.SelectedIndex = 2;
+                        DownloadUpdate_Click(null, null);
+                    }
+                }));
+            }));
         }
 
         private void InitializeTheme()
@@ -56,7 +103,6 @@ namespace DantesInferno.Launcher
             VersionText.Text = "Version: " + version.ToString();
             UpdateVersionText.Text = "Installed version: " + version.ToString();
 
-            // Resolution scale — the main quality setting
             ResScaleCombo.ItemsSource = new List<string>
             {
                 "Original (720p)",
@@ -68,7 +114,6 @@ namespace DantesInferno.Launcher
             if (scale > 3) scale = 3;
             ResScaleCombo.SelectedIndex = scale - 1;
 
-            // Anti-aliasing
             AAModeCombo.ItemsSource = new List<string> { "Off", "FXAA", "FXAA Extreme" };
             switch (_config.SwapPostEffect)
             {
@@ -78,25 +123,19 @@ namespace DantesInferno.Launcher
                 default: AAModeCombo.SelectedIndex = 0; break;
             }
 
-            // Texture filtering
             AnisoCombo.ItemsSource = new List<string> { "Default", "1x", "2x", "4x", "8x", "16x" };
             int aniso = _config.AnisotropicOverride;
-            if (aniso < 0) aniso = 0;       // Default
-            else if (aniso == 0) aniso = 0;  // Off maps to Default in UI
+            if (aniso < 0) aniso = 0;
             else aniso = Array.IndexOf(new[] { 0, 1, 2, 4, 8, 16 }, aniso);
             if (aniso < 0) aniso = 0;
             AnisoCombo.SelectedIndex = aniso;
 
-            // Fullscreen
             FullscreenCheck.IsChecked = _config.Fullscreen;
 
-            // Controller
             ControllerFixCheck.IsChecked = _config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase);
 
-            PlayStationGlyphsCheck.IsChecked = _config.PlayStationGlyphs;
-            GlyphFamilyCombo.SelectedIndex = _config.PlayStationGlyphs ? 1 : 0;
+            GlyphFamilyCombo.SelectedIndex = _config.GlyphFamily.Equals("playstation", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
 
-            // Logging
             LoggingEnabledCheck.IsChecked = !_config.LogLevel.Equals("off", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -128,12 +167,10 @@ namespace DantesInferno.Launcher
 
         private void SaveSettingsToConfig()
         {
-            // Resolution scale
             int scaleIdx = ResScaleCombo.SelectedIndex;
             if (scaleIdx < 0) scaleIdx = 0;
             _config.ResolutionScale = scaleIdx + 1;
 
-            // Anti-aliasing
             int aaIdx = AAModeCombo.SelectedIndex;
             switch (aaIdx)
             {
@@ -142,25 +179,21 @@ namespace DantesInferno.Launcher
                 default: _config.SwapPostEffect = "none"; break;
             }
 
-            // Texture filtering
             int anisoIdx = AnisoCombo.SelectedIndex;
             if (anisoIdx <= 0)
-                _config.AnisotropicOverride = -1; // Default
+                _config.AnisotropicOverride = -1;
             else
             {
                 int[] anisoValues = { 0, 1, 2, 4, 8, 16 };
                 _config.AnisotropicOverride = anisoValues[anisoIdx];
             }
 
-            // Fullscreen
             _config.Fullscreen = FullscreenCheck.IsChecked ?? true;
 
-            // Controller
-            _config.InputBackend = (ControllerFixCheck.IsChecked ?? false) ? "sdl" : "none";
+            _config.InputBackend = (ControllerFixCheck.IsChecked ?? false) ? "sdl" : "xinput";
 
-            _config.PlayStationGlyphs = GlyphFamilyCombo.SelectedIndex == 1;
+            _config.GlyphFamily = GlyphFamilyCombo.SelectedIndex == 1 ? "playstation" : "xbox";
 
-            // Logging
             bool loggingEnabled = LoggingEnabledCheck.IsChecked ?? true;
             _config.LogLevel = loggingEnabled ? "info" : "off";
         }
@@ -187,7 +220,6 @@ namespace DantesInferno.Launcher
                 return;
             }
 
-            // Save settings before launching (silently, no dialog)
             SaveSettingsToConfig();
             _config.Save();
 
@@ -198,38 +230,27 @@ namespace DantesInferno.Launcher
             var args = new List<string>();
             args.Add(string.Format("--game_data_root=\"{0}\"", gameData));
 
-            // Use ROV (rasterizer-ordered views) for correct alpha/transparency
-            // rendering. The host RTV path has known issues with alpha-blended
-            // models (e.g. invisible characters).
             args.Add("--render_target_path_d3d12=rov");
 
-            // Resolution scale
             int scale = _config.ResolutionScale;
             if (scale > 1)
                 args.Add(string.Format("--resolution_scale={0}", scale));
 
-            // Anti-aliasing
             if (!string.IsNullOrEmpty(_config.SwapPostEffect) && _config.SwapPostEffect != "none")
                 args.Add(string.Format("--swap_post_effect={0}", _config.SwapPostEffect));
 
-            // Anisotropic override
             if (_config.AnisotropicOverride >= 0)
                 args.Add(string.Format("--anisotropic_override={0}", _config.AnisotropicOverride));
 
-            // VSync — game runs at hardcoded 60 FPS.
-            // Always enable host VSync for smooth, tear-free frame pacing.
             args.Add("--vsync=true");
             args.Add("--d3d12_host_vsync=true");
             args.Add("--video_mode_refresh_rate=60");
 
-            // Input
-            if (_config.InputBackend.Equals("sdl", StringComparison.OrdinalIgnoreCase))
-                args.Add("--input_backend=sdl");
+            args.Add("--input_backend=" + _config.InputBackend);
 
-            // Logging
             args.Add(loggingEnabled ? "--log_level=info" : "--log_level=off");
 
-            if (GlyphFamilyCombo.SelectedIndex == 1)
+            if (_config.GlyphFamily.Equals("playstation", StringComparison.OrdinalIgnoreCase))
                 args.Add("--glyph_family=playstation");
 
             string arguments = string.Join(" ", args);
@@ -349,32 +370,160 @@ namespace DantesInferno.Launcher
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private ReleaseInfo _pendingUpdate;
+
         private void CheckUpdates_Click(object sender, RoutedEventArgs e)
         {
             UpdateStatusText.Text = "Checking for updates...";
+            DownloadUpdateButton.Visibility = Visibility.Collapsed;
             try
             {
                 var release = GitHubUpdater.CheckLatest();
                 var localVersion = GitHubUpdater.GetLocalVersion(_installDir);
                 if (release.Version > localVersion)
                 {
-                    string assetInfo = "";
-                    var asset = release.Assets.FirstOrDefault(a => a.Name.Equals("DantesInfernoInstaller.exe", StringComparison.OrdinalIgnoreCase));
+                    var asset = release.Assets.FirstOrDefault(
+                        a => a.Name.Equals("DantesInfernoInstaller.exe",
+                            StringComparison.OrdinalIgnoreCase));
+
                     if (asset != null)
                     {
-                        assetInfo = $"\n\nDownload: {asset.BrowserDownloadUrl}";
+                        _pendingUpdate = release;
+                        DownloadUpdateButton.Visibility = Visibility.Visible;
+                        UpdateStatusText.Text =
+                            $"Update available!\nVersion: {release.TagName}\nName: {release.Name}\n\n" +
+                            $"{release.Body}\n\nClick \"Download & Install\" to get the new installer.";
                     }
-                    UpdateStatusText.Text = $"Update available!\nVersion: {release.TagName}\nName: {release.Name}\n\n{release.Body}{assetInfo}";
+                    else
+                    {
+                        UpdateStatusText.Text =
+                            $"Update available!\nVersion: {release.TagName}\nName: {release.Name}\n\n" +
+                            $"{release.Body}\n\nNo installer asset found in this release. " +
+                            "Visit the releases page to download manually:\n" +
+                            release.HtmlUrl;
+                    }
                 }
                 else
                 {
+                    _pendingUpdate = null;
                     UpdateStatusText.Text = $"You are up to date.\nLatest: {release.TagName}\nInstalled: {localVersion}";
                 }
             }
             catch (Exception ex)
             {
+                _pendingUpdate = null;
                 UpdateStatusText.Text = "Failed to check for updates:\n" + ex.Message;
             }
+        }
+
+        private void DownloadUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            if (_pendingUpdate == null)
+            {
+                MessageBox.Show("No update has been checked yet. Click \"Check for Updates\" first.",
+                    "No Update", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var asset = _pendingUpdate.Assets.FirstOrDefault(
+                a => a.Name.Equals("DantesInfernoInstaller.exe",
+                    StringComparison.OrdinalIgnoreCase));
+            if (asset == null)
+            {
+                MessageBox.Show("The latest release has no installer asset to download.",
+                    "No Installer", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var confirm = MessageBox.Show(
+                $"A new version ({_pendingUpdate.TagName}) is available.\n\n" +
+                "The installer will be downloaded and launched. " +
+                "The launcher will close so the installer can update your game files.\n\n" +
+                "Continue?",
+                "Download and Install Update",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            DownloadUpdateButton.IsEnabled = false;
+            CheckUpdatesButton.IsEnabled = false;
+            DownloadProgress.Visibility = Visibility.Visible;
+            DownloadProgress.Value = 0;
+            UpdateStatusText.Text = "Downloading installer...";
+
+            string destDir = Path.Combine(Path.GetTempPath(), "DantesInfernoUpdate");
+
+            Task.Factory.StartNew(new Action(() =>
+            {
+                string downloadedPath = null;
+                string errorMsg = null;
+                try
+                {
+                    downloadedPath = GitHubUpdater.DownloadAsset(asset, destDir,
+                        (received, total) =>
+                        {
+                            if (total > 0)
+                            {
+                                int pct = (int)(100L * received / total);
+                                Dispatcher.Invoke(new Action(() =>
+                                {
+                                    DownloadProgress.Value = pct;
+                                    UpdateStatusText.Text =
+                                        $"Downloading... {pct}% ({received / 1024 / 1024} MB / {total / 1024 / 1024} MB)";
+                                }));
+                            }
+                        });
+                }
+                catch (Exception ex)
+                {
+                    errorMsg = ex.Message;
+                }
+
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    DownloadProgress.Value = 100;
+                    DownloadUpdateButton.IsEnabled = true;
+                    CheckUpdatesButton.IsEnabled = true;
+
+                    if (errorMsg != null)
+                    {
+                        DownloadProgress.Visibility = Visibility.Collapsed;
+                        UpdateStatusText.Text = "Download failed:\n" + errorMsg;
+                        return;
+                    }
+
+                    UpdateStatusText.Text = "Download complete. Launching installer...";
+
+                    var launch = MessageBox.Show(
+                        "The installer has been downloaded. Click OK to launch it.\n" +
+                        "The launcher will close and the installer will guide you through the update.",
+                        "Launch Installer", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+
+                    if (launch != MessageBoxResult.OK)
+                    {
+                        DownloadProgress.Visibility = Visibility.Collapsed;
+                        UpdateStatusText.Text = "Installer downloaded to:\n" + downloadedPath +
+                            "\n\nYou can run it manually later.";
+                        return;
+                    }
+
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = downloadedPath,
+                            UseShellExecute = true,
+                        });
+                        Application.Current.Shutdown();
+                    }
+                    catch (Exception ex)
+                    {
+                        DownloadProgress.Visibility = Visibility.Collapsed;
+                        UpdateStatusText.Text = "Failed to launch installer:\n" + ex.Message +
+                            "\n\nYou can run it manually from:\n" + downloadedPath;
+                    }
+                }));
+            }));
         }
 
         private void SupportButton_Click(object sender, RoutedEventArgs e)

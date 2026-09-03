@@ -73,7 +73,7 @@ namespace DantesInferno.Installer
 
                     long payloadOffset = length - trailerSize - payloadSize;
                     if (payloadOffset < 0)
-                        return null;
+                        throw new InvalidDataException("Installer payload is corrupt (invalid payload size).");
 
                     stream.Seek(payloadOffset, SeekOrigin.Begin);
                     byte[] payload = new byte[payloadSize];
@@ -84,6 +84,10 @@ namespace DantesInferno.Installer
                     ExtractPayloadArchive(payload, tempRoot);
                     return tempRoot;
                 }
+            }
+            catch (InvalidDataException)
+            {
+                throw;
             }
             catch (Exception)
             {
@@ -215,7 +219,6 @@ namespace DantesInferno.Installer
                 Directory.CreateDirectory(_destination);
                 string gameDir = Path.Combine(_destination, "game");
 
-                // Only extract the ISO if game data is not already present.
                 bool needExtraction = !Directory.Exists(gameDir) ||
                     !Directory.GetFiles(gameDir, "default.xex", SearchOption.AllDirectories).Any();
                 if (needExtraction)
@@ -277,16 +280,12 @@ namespace DantesInferno.Installer
                     _worker.ReportProgress(percent, $"Copied {relative}");
                 }
 
-                // Preserve existing settings, only update what's needed.
                 _worker.ReportProgress(88, "Updating configuration...");
                 string configPath = Path.Combine(_destination, "dantes_inferno.toml");
                 var config = GameConfig.Load(configPath);
-                // Always set the game data root and ROV path.
                 config.GameDataRoot = gameDir;
                 config.RenderTargetPath = "rov";
-                // Force logging off by default on install/update.
                 config.LogLevel = "off";
-                // Set sensible defaults only if not already configured.
                 if (string.IsNullOrEmpty(config.Resolution))
                     config.Resolution = "1080p";
                 if (config.ResolutionScale < 1)
@@ -301,16 +300,14 @@ namespace DantesInferno.Installer
                     config.InputBackend = "sdl";
                 config.Save();
 
-                // Write the version from the payload's version.txt.
                 string versionFile = GetPayloadFile("version.txt");
-                string versionStr = "0.3.1-alpha";
+                string versionStr = "0.0.0";
                 if (File.Exists(versionFile))
                     versionStr = File.ReadAllText(versionFile).Trim();
-                string destVersionFile = Path.Combine(_destination, "version.txt");
-                File.WriteAllText(destVersionFile, versionStr + "\n");
-                GitHubUpdater.SetLocalVersion(_destination, SemanticVersion.Parse(versionStr));
+                var version = SemanticVersion.Parse(versionStr);
+                GitHubUpdater.SetLocalVersion(_destination, version);
 
-                RegisterInAddRemovePrograms(_destination, versionStr);
+                RegisterInAddRemovePrograms(_destination, version.ToString());
 
                 _worker.ReportProgress(100, "Installation complete.");
             }
@@ -412,7 +409,10 @@ namespace DantesInferno.Installer
                     key.SetValue("URLInfoAbout", "https://github.com/florinp93/dantes-inferno");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _worker.ReportProgress(0, "WARNING: Could not register in Add/Remove Programs: " + ex.Message);
+            }
         }
     }
 }

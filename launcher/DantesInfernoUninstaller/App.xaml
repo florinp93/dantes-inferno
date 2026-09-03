@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="BackgroundDark" Color="#1A1A1A" />
-        <SolidColorBrush x:Key="BackgroundPanel" Color="#2A2A2A" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#8B0000" />
-        <SolidColorBrush x:Key="TextBrush" Color="#E0E0E0" />
-        <SolidColorBrush x:Key="BorderBrush" Color="#444444" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

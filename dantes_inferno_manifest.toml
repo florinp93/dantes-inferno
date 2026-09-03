@@ -210,3 +210,33 @@ name = "unresolved_target_821AC330"
 
 [entrypoint.functions.0x822D2358]
 name = "unresolved_target_822D2358"
+
+# The 8 entries below were discovered at runtime (not by codegen's static
+# scanner) by actually playing through the prologue/first combat encounter
+# with the real XEX on a Linux/clang-cl/xwin cross-compile - see
+# docs/linux-cross-compile.md. Each one fixed a
+# "[FATAL] Call to invalid or unregistered function at guest address 0x..."
+# crash at a specific point in the intro sequence and first boss fight.
+[entrypoint.functions.0x82452448]
+name = "unresolved_target_82452448"
+
+[entrypoint.functions.0x826BA5E0]
+name = "unresolved_target_826BA5E0"
+
+[entrypoint.functions.0x826BEDF8]
+name = "unresolved_target_826BEDF8"
+
+[entrypoint.functions.0x826BF6B0]
+name = "unresolved_target_826BF6B0"
+
+[entrypoint.functions.0x8231C848]
+name = "unresolved_target_8231C848"
+
+[entrypoint.functions.0x8231C828]
+name = "unresolved_target_8231C828"
+
+[entrypoint.functions.0x82325360]
+name = "unresolved_target_82325360"
+
+[entrypoint.functions.0x822C0CA8]
+name = "unresolved_target_822C0CA8"

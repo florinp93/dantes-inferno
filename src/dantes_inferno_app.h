@@ -10,7 +10,8 @@
 #include <rex/input/flags.h>
 #include <rex/ui/keybinds.h>
 #include <rex/ui/imgui_dialog.h>
-#include <rex/ui/presenter.h>
+#include <rex/graphics/command_processor.h>
+#include <rex/graphics/graphics_system.h>
 #include <rex/logging/macros.h>
 
 #include <array>
@@ -27,14 +28,19 @@ REXCVAR_DEFINE_BOOL(show_fps_overlay, false, "UI",
 
 // Simple FPS + frametime overlay dialog, always visible in top-left corner.
 // Measures actual guest frame rate (game frames), not host present rate.
+//
+// The guest frame boundary is CommandProcessor::counter_, incremented once
+// per PM4_XE_SWAP packet the recompiled game submits (see VdSwap_entry in
+// xboxkrnl_video.cpp and CommandProcessor::ExecutePacketType3_XE_SWAP) -
+// i.e. once per real guest-side present, not once per host D3D12 present.
 class FpsOverlayDialog : public rex::ui::ImGuiDialog {
  public:
   explicit FpsOverlayDialog(rex::ui::ImGuiDrawer* drawer,
-                            rex::ui::Presenter* presenter)
+                            rex::graphics::CommandProcessor* command_processor)
       : rex::ui::ImGuiDialog(drawer),
-        presenter_(presenter),
+        command_processor_(command_processor),
         last_time_(std::chrono::steady_clock::now()),
-        last_guest_frame_count_(presenter ? presenter->guest_frame_count() : 0) {}
+        last_guest_frame_count_(command_processor ? command_processor->counter() : 0) {}
 
  protected:
   void OnDraw(ImGuiIO& io) override {
@@ -42,9 +48,10 @@ class FpsOverlayDialog : public rex::ui::ImGuiDialog {
     auto delta = std::chrono::duration<double, std::milli>(now - last_time_);
     last_time_ = now;
 
-    // Read the guest frame counter from the presenter to get the actual
-    // game frame rate (not the host present rate).
-    uint64_t current_guest_frames = presenter_ ? presenter_->guest_frame_count() : 0;
+    // Read the guest frame counter from the GPU command processor to get
+    // the actual game frame rate (not the host present rate).
+    uint64_t current_guest_frames =
+        command_processor_ ? command_processor_->counter() : 0;
     uint64_t frames_delta = current_guest_frames - last_guest_frame_count_;
     last_guest_frame_count_ = current_guest_frames;
 
@@ -113,7 +120,7 @@ class FpsOverlayDialog : public rex::ui::ImGuiDialog {
   static constexpr size_t kHistorySize = 120;
   std::array<float, kHistorySize> frame_history_{};
   size_t history_idx_ = 0;
-  rex::ui::Presenter* presenter_;
+  rex::graphics::CommandProcessor* command_processor_;
   std::chrono::steady_clock::time_point last_time_;
   uint64_t last_guest_frame_count_;
   double smoothed_fps_ = 0.0;
@@ -237,9 +244,15 @@ class DantesInfernoApp : public rex::ReXApp {
 
     // Create the FPS overlay if enabled.
     if (REXCVAR_GET(show_fps_overlay) && imgui_drawer()) {
+      // IGraphicsSystem (the interface runtime() hands back) only exposes
+      // presenter(); command_processor() lives on the concrete backend base
+      // (D3D12/Vulkan both derive from it), same downcast the SDK itself
+      // uses internally (see d3d12/graphics_system.cpp).
       auto* gfx_sys = runtime() ? runtime()->graphics_system() : nullptr;
-      auto* presenter = gfx_sys ? gfx_sys->presenter() : nullptr;
-      fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), presenter);
+      auto* command_processor = gfx_sys
+          ? static_cast<rex::graphics::GraphicsSystem*>(gfx_sys)->command_processor()
+          : nullptr;
+      fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), command_processor);
     }
 
     // F1 toggles the FPS overlay on/off.
@@ -249,8 +262,10 @@ class DantesInfernoApp : public rex::ReXApp {
         fps_overlay_.reset();
       } else if (imgui_drawer()) {
         auto* gfx_sys = runtime() ? runtime()->graphics_system() : nullptr;
-        auto* presenter = gfx_sys ? gfx_sys->presenter() : nullptr;
-        fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), presenter);
+        auto* command_processor = gfx_sys
+            ? static_cast<rex::graphics::GraphicsSystem*>(gfx_sys)->command_processor()
+            : nullptr;
+        fps_overlay_ = std::make_unique<FpsOverlayDialog>(imgui_drawer(), command_processor);
       }
     });
 

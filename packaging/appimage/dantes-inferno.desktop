@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Dante's Inferno
+Comment=Native ARM64 launcher for Dante's Inferno
+Exec=dantes_inferno_launcher
+Icon=dantes-inferno
+Categories=Game;ActionGame;
+Terminal=false
+StartupNotify=true

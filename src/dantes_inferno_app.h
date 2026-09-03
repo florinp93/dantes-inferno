@@ -7,6 +7,7 @@
 #include <rex/rex_app.h>
 #include <rex/cvar.h>
 #include <rex/chrono/clock.h>
+#include <rex/filesystem.h>
 #include <rex/input/flags.h>
 #include <rex/ui/keybinds.h>
 #include <rex/ui/imgui_dialog.h>
@@ -16,6 +17,7 @@
 
 #include <array>
 #include <chrono>
+#include <filesystem>
 
 // Time scalar cvar: 1.0 = normal speed, 50.0 = 50x fast-forward for FMVs.
 // Can be set from the console (backtick key) or toggled with F2.
@@ -135,6 +137,23 @@ class DantesInfernoApp : public rex::ReXApp {
       rex::ui::WindowedAppContext& ctx) {
     return std::unique_ptr<DantesInfernoApp>(new DantesInfernoApp(ctx, "dantes_inferno",
         PPCImageConfig));
+  }
+
+  void OnConfigurePaths(rex::PathConfig& paths) override {
+    if (!paths.game_data_root.empty())
+      return;
+
+    const std::filesystem::path candidates[] = {
+        rex::filesystem::GetExecutableFolder() / "game",
+        std::filesystem::current_path() / "game",
+    };
+    for (const auto& candidate : candidates) {
+      std::error_code ec;
+      if (std::filesystem::is_directory(candidate, ec)) {
+        paths.game_data_root = candidate;
+        return;
+      }
+    }
   }
 
   void OnPreSetup(rex::RuntimeConfig& config) override {

@@ -221,3 +221,667 @@ name = "unresolved_target_82325360"
 
 [entrypoint.functions.0x822C0CA8]
 name = "unresolved_target_822C0CA8"
+
+# Extra unresolved targets from ARM64 launcher work.
+[entrypoint.functions.0x826BEDE8]
+name = "unresolved_target_826BEDE8"
+
+[entrypoint.functions.0x821858B0]
+name = "unresolved_target_821858B0"
+
+[entrypoint.functions.0x82187290]
+name = "unresolved_target_82187290"
+
+[entrypoint.functions.0x821A4DA0]
+name = "unresolved_target_821A4DA0"
+
+[entrypoint.functions.0x821A62C8]
+name = "unresolved_target_821A62C8"
+
+[entrypoint.functions.0x821BA208]
+name = "unresolved_target_821BA208"
+
+[entrypoint.functions.0x821C1F80]
+name = "unresolved_target_821C1F80"
+
+[entrypoint.functions.0x821E1DD0]
+name = "unresolved_target_821E1DD0"
+
+[entrypoint.functions.0x82204B40]
+name = "unresolved_target_82204B40"
+
+[entrypoint.functions.0x822089A0]
+name = "unresolved_target_822089A0"
+
+[entrypoint.functions.0x8221D1C0]
+name = "unresolved_target_8221D1C0"
+
+[entrypoint.functions.0x8221D238]
+name = "unresolved_target_8221D238"
+
+[entrypoint.functions.0x82220180]
+name = "unresolved_target_82220180"
+
+[entrypoint.functions.0x82224CC8]
+name = "unresolved_target_82224CC8"
+
+[entrypoint.functions.0x82281B30]
+name = "unresolved_target_82281B30"
+
+[entrypoint.functions.0x82283358]
+name = "unresolved_target_82283358"
+
+[entrypoint.functions.0x82297218]
+name = "unresolved_target_82297218"
+
+[entrypoint.functions.0x822D5248]
+name = "unresolved_target_822D5248"
+
+[entrypoint.functions.0x822D7330]
+name = "unresolved_target_822D7330"
+
+[entrypoint.functions.0x822D7390]
+name = "unresolved_target_822D7390"
+
+[entrypoint.functions.0x822E6C88]
+name = "unresolved_target_822E6C88"
+
+[entrypoint.functions.0x8230AFB0]
+name = "unresolved_target_8230AFB0"
+
+[entrypoint.functions.0x8230CF08]
+name = "unresolved_target_8230CF08"
+
+[entrypoint.functions.0x8230D058]
+name = "unresolved_target_8230D058"
+
+[entrypoint.functions.0x8230D0E0]
+name = "unresolved_target_8230D0E0"
+
+[entrypoint.functions.0x8230E7A8]
+name = "unresolved_target_8230E7A8"
+
+[entrypoint.functions.0x82325980]
+name = "unresolved_target_82325980"
+
+[entrypoint.functions.0x82329698]
+name = "unresolved_target_82329698"
+
+[entrypoint.functions.0x8234E368]
+name = "unresolved_target_8234E368"
+
+[entrypoint.functions.0x8234E3B8]
+name = "unresolved_target_8234E3B8"
+
+[entrypoint.functions.0x8234E4E0]
+name = "unresolved_target_8234E4E0"
+
+[entrypoint.functions.0x8234E5E8]
+name = "unresolved_target_8234E5E8"
+
+[entrypoint.functions.0x823CBB30]
+name = "unresolved_target_823CBB30"
+
+[entrypoint.functions.0x824089B0]
+name = "unresolved_target_824089B0"
+
+[entrypoint.functions.0x824112D0]
+name = "unresolved_target_824112D0"
+
+[entrypoint.functions.0x82430FD8]
+name = "unresolved_target_82430FD8"
+
+[entrypoint.functions.0x82436040]
+name = "unresolved_target_82436040"
+
+[entrypoint.functions.0x82447A98]
+name = "unresolved_target_82447A98"
+
+[entrypoint.functions.0x8244C400]
+name = "unresolved_target_8244C400"
+
+[entrypoint.functions.0x82462230]
+name = "unresolved_target_82462230"
+
+[entrypoint.functions.0x82470358]
+name = "unresolved_target_82470358"
+
+[entrypoint.functions.0x82477C98]
+name = "unresolved_target_82477C98"
+
+[entrypoint.functions.0x82477D30]
+name = "unresolved_target_82477D30"
+
+[entrypoint.functions.0x82477D88]
+name = "unresolved_target_82477D88"
+
+[entrypoint.functions.0x8247E098]
+name = "unresolved_target_8247E098"
+
+[entrypoint.functions.0x8247EEB8]
+name = "unresolved_target_8247EEB8"
+
+[entrypoint.functions.0x82481CA0]
+name = "unresolved_target_82481CA0"
+
+[entrypoint.functions.0x82482EA0]
+name = "unresolved_target_82482EA0"
+
+[entrypoint.functions.0x824834A8]
+name = "unresolved_target_824834A8"
+
+[entrypoint.functions.0x82487860]
+name = "unresolved_target_82487860"
+
+[entrypoint.functions.0x8248D660]
+name = "unresolved_target_8248D660"
+
+[entrypoint.functions.0x8248D680]
+name = "unresolved_target_8248D680"
+
+[entrypoint.functions.0x8249D6D0]
+name = "unresolved_target_8249D6D0"
+
+[entrypoint.functions.0x824A9A58]
+name = "unresolved_target_824A9A58"
+
+[entrypoint.functions.0x824BAD60]
+name = "unresolved_target_824BAD60"
+
+[entrypoint.functions.0x824D1AB8]
+name = "unresolved_target_824D1AB8"
+
+[entrypoint.functions.0x824D1AE8]
+name = "unresolved_target_824D1AE8"
+
+[entrypoint.functions.0x824D33C0]
+name = "unresolved_target_824D33C0"
+
+[entrypoint.functions.0x824F8870]
+name = "unresolved_target_824F8870"
+
+[entrypoint.functions.0x82511AE8]
+name = "unresolved_target_82511AE8"
+
+[entrypoint.functions.0x82525010]
+name = "unresolved_target_82525010"
+
+[entrypoint.functions.0x825250A0]
+name = "unresolved_target_825250A0"
+
+[entrypoint.functions.0x825250C8]
+name = "unresolved_target_825250C8"
+
+[entrypoint.functions.0x82558F18]
+name = "unresolved_target_82558F18"
+
+[entrypoint.functions.0x8258E6E0]
+name = "unresolved_target_8258E6E0"
+
+[entrypoint.functions.0x825B5F00]
+name = "unresolved_target_825B5F00"
+
+[entrypoint.functions.0x825BBD08]
+name = "unresolved_target_825BBD08"
+
+[entrypoint.functions.0x825DC910]
+name = "unresolved_target_825DC910"
+
+[entrypoint.functions.0x825DD500]
+name = "unresolved_target_825DD500"
+
+[entrypoint.functions.0x825DD5C8]
+name = "unresolved_target_825DD5C8"
+
+[entrypoint.functions.0x825E0C70]
+name = "unresolved_target_825E0C70"
+
+[entrypoint.functions.0x825E6C50]
+name = "unresolved_target_825E6C50"
+
+[entrypoint.functions.0x825E73C0]
+name = "unresolved_target_825E73C0"
+
+[entrypoint.functions.0x82627560]
+name = "unresolved_target_82627560"
+
+[entrypoint.functions.0x8262E6B0]
+name = "unresolved_target_8262E6B0"
+
+[entrypoint.functions.0x826339A8]
+name = "unresolved_target_826339A8"
+
+[entrypoint.functions.0x82640E88]
+name = "unresolved_target_82640E88"
+
+[entrypoint.functions.0x826B23F8]
+name = "unresolved_target_826B23F8"
+
+[entrypoint.functions.0x826B29A4]
+name = "unresolved_target_826B29A4"
+
+[entrypoint.functions.0x826B29C8]
+name = "unresolved_target_826B29C8"
+
+[entrypoint.functions.0x826B4EC0]
+name = "unresolved_target_826B4EC0"
+
+[entrypoint.functions.0x826B4F2C]
+name = "unresolved_target_826B4F2C"
+
+[entrypoint.functions.0x826B8FC0]
+name = "unresolved_target_826B8FC0"
+
+[entrypoint.functions.0x826B8FE8]
+name = "unresolved_target_826B8FE8"
+
+[entrypoint.functions.0x826B9010]
+name = "unresolved_target_826B9010"
+
+[entrypoint.functions.0x826BF0B0]
+name = "unresolved_target_826BF0B0"
+
+[entrypoint.functions.0x826BF1F8]
+name = "unresolved_target_826BF1F8"
+
+[entrypoint.functions.0x826BF220]
+name = "unresolved_target_826BF220"
+
+[entrypoint.functions.0x826BF248]
+name = "unresolved_target_826BF248"
+
+[entrypoint.functions.0x826C0418]
+name = "unresolved_target_826C0418"
+
+[entrypoint.functions.0x826C1160]
+name = "unresolved_target_826C1160"
+
+[entrypoint.functions.0x826C4220]
+name = "unresolved_target_826C4220"
+
+[entrypoint.functions.0x826CDA20]
+name = "unresolved_target_826CDA20"
+
+[entrypoint.functions.0x826CDA80]
+name = "unresolved_target_826CDA80"
+
+[entrypoint.functions.0x826D0428]
+name = "unresolved_target_826D0428"
+
+[entrypoint.functions.0x826D2F38]
+name = "unresolved_target_826D2F38"
+
+[entrypoint.functions.0x826EE1B0]
+name = "unresolved_target_826EE1B0"
+
+[entrypoint.functions.0x826EE210]
+name = "unresolved_target_826EE210"
+
+[entrypoint.functions.0x826EE550]
+name = "unresolved_target_826EE550"
+
+[entrypoint.functions.0x826F8CC0]
+name = "unresolved_target_826F8CC0"
+
+[entrypoint.functions.0x826F8CF0]
+name = "unresolved_target_826F8CF0"
+
+[entrypoint.functions.0x826FAFE8]
+name = "unresolved_target_826FAFE8"
+
+[entrypoint.functions.0x826FDF58]
+name = "unresolved_target_826FDF58"
+
+[entrypoint.functions.0x826FE128]
+name = "unresolved_target_826FE128"
+
+[entrypoint.functions.0x826FE2E0]
+name = "unresolved_target_826FE2E0"
+
+[entrypoint.functions.0x826FE3F8]
+name = "unresolved_target_826FE3F8"
+
+[entrypoint.functions.0x826FEA78]
+name = "unresolved_target_826FEA78"
+
+[entrypoint.functions.0x82700390]
+name = "unresolved_target_82700390"
+
+[entrypoint.functions.0x82700708]
+name = "unresolved_target_82700708"
+
+[entrypoint.functions.0x82700910]
+name = "unresolved_target_82700910"
+
+[entrypoint.functions.0x82700AF0]
+name = "unresolved_target_82700AF0"
+
+[entrypoint.functions.0x82702670]
+name = "unresolved_target_82702670"
+
+[entrypoint.functions.0x82702980]
+name = "unresolved_target_82702980"
+
+[entrypoint.functions.0x827030A0]
+name = "unresolved_target_827030A0"
+
+[entrypoint.functions.0x82706A30]
+name = "unresolved_target_82706A30"
+
+[entrypoint.functions.0x82707100]
+name = "unresolved_target_82707100"
+
+[entrypoint.functions.0x827074A0]
+name = "unresolved_target_827074A0"
+
+[entrypoint.functions.0x82707500]
+name = "unresolved_target_82707500"
+
+[entrypoint.functions.0x8270AF68]
+name = "unresolved_target_8270AF68"
+
+[entrypoint.functions.0x8270CA04]
+name = "unresolved_target_8270CA04"
+
+[entrypoint.functions.0x8270CA18]
+name = "unresolved_target_8270CA18"
+
+[entrypoint.functions.0x8270D388]
+name = "unresolved_target_8270D388"
+
+[entrypoint.functions.0x8270E960]
+name = "unresolved_target_8270E960"
+
+[entrypoint.functions.0x8270EA90]
+name = "unresolved_target_8270EA90"
+
+[entrypoint.functions.0x82717128]
+name = "unresolved_target_82717128"
+
+[entrypoint.functions.0x827566C0]
+name = "unresolved_target_827566C0"
+
+[entrypoint.functions.0x827566E8]
+name = "unresolved_target_827566E8"
+
+[entrypoint.functions.0x82756710]
+name = "unresolved_target_82756710"
+
+[entrypoint.functions.0x827C98B8]
+name = "unresolved_target_827C98B8"
+
+[entrypoint.functions.0x827C98F0]
+name = "unresolved_target_827C98F0"
+
+[entrypoint.functions.0x827CBD60]
+name = "unresolved_target_827CBD60"
+
+[entrypoint.functions.0x827CBD98]
+name = "unresolved_target_827CBD98"
+
+[entrypoint.functions.0x827CC470]
+name = "unresolved_target_827CC470"
+
+[entrypoint.functions.0x827CCB20]
+name = "unresolved_target_827CCB20"
+
+[entrypoint.functions.0x827CCCD8]
+name = "unresolved_target_827CCCD8"
+
+[entrypoint.functions.0x827CE0F0]
+name = "unresolved_target_827CE0F0"
+
+[entrypoint.functions.0x8221FDF0]
+name = "unresolved_target_8221FDF0"
+
+[entrypoint.functions.0x8221FDF8]
+name = "unresolved_target_8221FDF8"
+
+[entrypoint.functions.0x8221FE00]
+name = "unresolved_target_8221FE00"
+
+[entrypoint.functions.0x8221FE08]
+name = "unresolved_target_8221FE08"
+
+[entrypoint.functions.0x8231C830]
+name = "unresolved_target_8231C830"
+
+[entrypoint.functions.0x8231C838]
+name = "unresolved_target_8231C838"
+
+[entrypoint.functions.0x8231C840]
+name = "unresolved_target_8231C840"
+
+[entrypoint.functions.0x8231C850]
+name = "unresolved_target_8231C850"
+
+[entrypoint.functions.0x82327418]
+name = "unresolved_target_82327418"
+
+[entrypoint.functions.0x82327420]
+name = "unresolved_target_82327420"
+
+[entrypoint.functions.0x82327428]
+name = "unresolved_target_82327428"
+
+[entrypoint.functions.0x82327430]
+name = "unresolved_target_82327430"
+
+[entrypoint.functions.0x82327438]
+name = "unresolved_target_82327438"
+
+[entrypoint.functions.0x823C2DC0]
+name = "unresolved_target_823C2DC0"
+
+[entrypoint.functions.0x823C2DC8]
+name = "unresolved_target_823C2DC8"
+
+[entrypoint.functions.0x823C2DD0]
+name = "unresolved_target_823C2DD0"
+
+[entrypoint.functions.0x823C2DD8]
+name = "unresolved_target_823C2DD8"
+
+[entrypoint.functions.0x823C2DE0]
+name = "unresolved_target_823C2DE0"
+
+[entrypoint.functions.0x82436068]
+name = "unresolved_target_82436068"
+
+[entrypoint.functions.0x82436070]
+name = "unresolved_target_82436070"
+
+[entrypoint.functions.0x82436078]
+name = "unresolved_target_82436078"
+
+[entrypoint.functions.0x82436080]
+name = "unresolved_target_82436080"
+
+[entrypoint.functions.0x82436088]
+name = "unresolved_target_82436088"
+
+[entrypoint.functions.0x82482578]
+name = "unresolved_target_82482578"
+
+[entrypoint.functions.0x82482580]
+name = "unresolved_target_82482580"
+
+[entrypoint.functions.0x82482588]
+name = "unresolved_target_82482588"
+
+[entrypoint.functions.0x82482590]
+name = "unresolved_target_82482590"
+
+[entrypoint.functions.0x82482598]
+name = "unresolved_target_82482598"
+
+[entrypoint.functions.0x824825A0]
+name = "unresolved_target_824825A0"
+
+[entrypoint.functions.0x825B4D04]
+name = "unresolved_target_825B4D04"
+
+[entrypoint.functions.0x825B4D0C]
+name = "unresolved_target_825B4D0C"
+
+[entrypoint.functions.0x825B4D14]
+name = "unresolved_target_825B4D14"
+
+[entrypoint.functions.0x825B4D1C]
+name = "unresolved_target_825B4D1C"
+
+[entrypoint.functions.0x825DD530]
+name = "unresolved_target_825DD530"
+
+[entrypoint.functions.0x825E6B88]
+name = "unresolved_target_825E6B88"
+
+[entrypoint.functions.0x8260AD88]
+name = "unresolved_target_8260AD88"
+
+[entrypoint.functions.0x8260AD90]
+name = "unresolved_target_8260AD90"
+
+[entrypoint.functions.0x8260AD98]
+name = "unresolved_target_8260AD98"
+
+[entrypoint.functions.0x8260ADA0]
+name = "unresolved_target_8260ADA0"
+
+[entrypoint.functions.0x82611F70]
+name = "unresolved_target_82611F70"
+
+[entrypoint.functions.0x82611F78]
+name = "unresolved_target_82611F78"
+
+[entrypoint.functions.0x82611F80]
+name = "unresolved_target_82611F80"
+
+[entrypoint.functions.0x82611F88]
+name = "unresolved_target_82611F88"
+
+[entrypoint.functions.0x82611F90]
+name = "unresolved_target_82611F90"
+
+[entrypoint.functions.0x8268D870]
+name = "unresolved_target_8268D870"
+
+[entrypoint.functions.0x8268D878]
+name = "unresolved_target_8268D878"
+
+[entrypoint.functions.0x8268D880]
+name = "unresolved_target_8268D880"
+
+[entrypoint.functions.0x8268D888]
+name = "unresolved_target_8268D888"
+
+[entrypoint.functions.0x8268D890]
+name = "unresolved_target_8268D890"
+
+[entrypoint.functions.0x8268D898]
+name = "unresolved_target_8268D898"
+
+[entrypoint.functions.0x826BA5B8]
+name = "unresolved_target_826BA5B8"
+
+[entrypoint.functions.0x826BA5C0]
+name = "unresolved_target_826BA5C0"
+
+[entrypoint.functions.0x826BA5C8]
+name = "unresolved_target_826BA5C8"
+
+[entrypoint.functions.0x826BA5D0]
+name = "unresolved_target_826BA5D0"
+
+[entrypoint.functions.0x826BA5D8]
+name = "unresolved_target_826BA5D8"
+
+[entrypoint.functions.0x826BEE08]
+name = "unresolved_target_826BEE08"
+
+[entrypoint.functions.0x826BEE10]
+name = "unresolved_target_826BEE10"
+
+[entrypoint.functions.0x826BEE18]
+name = "unresolved_target_826BEE18"
+
+[entrypoint.functions.0x826BEE20]
+name = "unresolved_target_826BEE20"
+
+[entrypoint.functions.0x826BEE28]
+name = "unresolved_target_826BEE28"
+
+[entrypoint.functions.0x826BF0C0]
+name = "unresolved_target_826BF0C0"
+
+[entrypoint.functions.0x826BF0C8]
+name = "unresolved_target_826BF0C8"
+
+[entrypoint.functions.0x826BF0D0]
+name = "unresolved_target_826BF0D0"
+
+[entrypoint.functions.0x826BF0D8]
+name = "unresolved_target_826BF0D8"
+
+[entrypoint.functions.0x826C3F90]
+name = "unresolved_target_826C3F90"
+
+[entrypoint.functions.0x826C3F98]
+name = "unresolved_target_826C3F98"
+
+[entrypoint.functions.0x826C3FA0]
+name = "unresolved_target_826C3FA0"
+
+[entrypoint.functions.0x826C3FA8]
+name = "unresolved_target_826C3FA8"
+
+[entrypoint.functions.0x826C3FB0]
+name = "unresolved_target_826C3FB0"
+
+[entrypoint.functions.0x826C3FB8]
+name = "unresolved_target_826C3FB8"
+
+[entrypoint.functions.0x827077C8]
+name = "unresolved_target_827077C8"
+
+[entrypoint.functions.0x827077D0]
+name = "unresolved_target_827077D0"
+
+[entrypoint.functions.0x827077D8]
+name = "unresolved_target_827077D8"
+
+[entrypoint.functions.0x827077E0]
+name = "unresolved_target_827077E0"
+
+[entrypoint.functions.0x82730DB8]
+name = "unresolved_target_82730DB8"
+
+[entrypoint.functions.0x82730DC0]
+name = "unresolved_target_82730DC0"
+
+[entrypoint.functions.0x82730DC8]
+name = "unresolved_target_82730DC8"
+
+[entrypoint.functions.0x82730DD0]
+name = "unresolved_target_82730DD0"
+
+[entrypoint.functions.0x82730DD8]
+name = "unresolved_target_82730DD8"
+
+[entrypoint.functions.0x827CDA88]
+name = "unresolved_target_827CDA88"
+
+[entrypoint.functions.0x827CDA90]
+name = "unresolved_target_827CDA90"
+
+[entrypoint.functions.0x827CDA98]
+name = "unresolved_target_827CDA98"
+
+[entrypoint.functions.0x827CDAA0]
+name = "unresolved_target_827CDAA0"
+
+[entrypoint.functions.0x827CDAA8]
+name = "unresolved_target_827CDAA8"
+
+[entrypoint.functions.0x827CDAB0]
+name = "unresolved_target_827CDAB0"

@@ -6,6 +6,9 @@
   <a href="https://ko-fi.com/zerkiller">
     <img src="https://img.shields.io/badge/Ko--Fi-Buy%20me%20a%20coffee-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi" />
   </a>
+    <a href="https://discord.gg/mjGfv7ysG8">
+    <img src="https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
+  </a>
   <a href="https://github.com/florinp93">
     <img src="https://img.shields.io/badge/Other-Projects-0AB4F5?style=for-the-badge&logo=github&logoColor=white" alt="Other Projects" />
   </a>

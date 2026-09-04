@@ -178,10 +178,16 @@ class DantesInfernoApp : public rex::ReXApp {
 
     double target_aspect = REXCVAR_GET(ultrawide_target_aspect);
     if (target_aspect > 0.0) {
-      rex::cvar::SetFlagByName("present_letterbox", "false");
       g_ultrawide_target_aspect = static_cast<float>(target_aspect);
-      REXLOG_INFO("ULTRAWIDE: target_aspect={:.4f}, present_letterbox disabled",
-                  target_aspect);
+      if (target_aspect >= 1.7778) {
+        rex::cvar::SetFlagByName("present_letterbox", "false");
+        REXLOG_INFO("ULTRAWIDE: target_aspect={:.4f}, present_letterbox disabled",
+                    target_aspect);
+      } else {
+        rex::cvar::SetFlagByName("present_letterbox", "true");
+        REXLOG_INFO("ULTRAWIDE: target_aspect={:.4f}, present_letterbox enabled",
+                    target_aspect);
+      }
     } else {
       REXLOG_INFO("ULTRAWIDE: disabled (target_aspect={:.4f})", target_aspect);
     }
@@ -208,7 +214,7 @@ class DantesInfernoApp : public rex::ReXApp {
         [](std::string_view, std::string_view new_value) {
           double aspect = std::stod(std::string(new_value));
           g_ultrawide_target_aspect = static_cast<float>(aspect);
-          if (aspect > 0.0) {
+          if (aspect >= 1.7778) {
             rex::cvar::SetFlagByName("present_letterbox", "false");
           } else {
             rex::cvar::SetFlagByName("present_letterbox", "true");

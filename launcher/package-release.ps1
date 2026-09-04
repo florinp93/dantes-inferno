@@ -70,13 +70,13 @@ $binVersionFile = Join-Path $root "DantesInfernoLauncher\bin\$Configuration\vers
 if (Test-Path $binVersionFile) {
     $binVersion = (Get-Content $binVersionFile -Raw).Trim()
     if ($binVersion -ne $Version) {
-        Write-Warning "version.txt in bin output ($binVersion) does not match expected ($Version) — overwriting."
+        Write-Warning "version.txt in bin output ($binVersion) does not match expected ($Version) - overwriting."
         [System.IO.File]::WriteAllText($binVersionFile, $Version + "`r`n", $utf8NoBom)
     } else {
         Write-Host "version.txt in build output verified: $binVersion"
     }
 } else {
-    Write-Warning "version.txt not found in launcher bin — creating with version $Version."
+    Write-Warning "version.txt not found in launcher bin - creating with version $Version."
     [System.IO.File]::WriteAllText($binVersionFile, $Version + "`r`n", $utf8NoBom)
 }
 

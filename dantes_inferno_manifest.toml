@@ -1,4 +1,4 @@
-﻿[project]
+[project]
 name = "dantes_inferno"
 sdk_version = "0.10.0"
 game_root = "game"
@@ -7,6 +7,12 @@ game_root = "game"
 file_path = "game/default.xex"
 out_directory_path = "generated/default"
 includes = []
+
+[[midasm_hook]]
+address = 0x8251DC88
+name = "UltrawideAspectHook"
+registers = ["f29"]
+after_instruction = true
 
 
 [entrypoint.functions.0x8221FE10]
@@ -222,7 +228,6 @@ name = "unresolved_target_82325360"
 [entrypoint.functions.0x822C0CA8]
 name = "unresolved_target_822C0CA8"
 
-# Extra unresolved targets from ARM64 launcher work.
 [entrypoint.functions.0x826BEDE8]
 name = "unresolved_target_826BEDE8"
 

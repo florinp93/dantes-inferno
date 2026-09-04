@@ -1,4 +1,5 @@
 param(
+    [string]$Version,
     [string]$GameBuildDir = "..\out\build\win-amd64-release",
     [string]$Configuration = "Release",
     [string]$OutputDir = "..\alpha-release"
@@ -20,6 +21,34 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $GameBuildDir = (Join-Path $root $GameBuildDir | Resolve-Path -ErrorAction Stop).Path
 $OutputDir = [System.IO.Path]::GetFullPath((Join-Path $root $OutputDir))
 
+$sourceVersionFile = Join-Path $root "DantesInfernoLauncher\version.txt"
+$issFile = Join-Path $root "installer.iss"
+
+if (-not $Version) {
+    if (Test-Path $sourceVersionFile) {
+        $Version = (Get-Content $sourceVersionFile -Raw).Trim()
+    }
+    if (-not $Version) {
+        $Version = "0.0.0"
+    }
+    Write-Host "Using version from version.txt: $Version"
+} else {
+    Write-Host "Updating version to: $Version"
+}
+
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($sourceVersionFile, $Version + "`r`n", $utf8NoBom)
+
+if (Test-Path $issFile) {
+    $issContent = [System.IO.File]::ReadAllText($issFile, [System.Text.Encoding]::UTF8)
+    $issContent = [System.Text.RegularExpressions.Regex]::Replace(
+        $issContent,
+        '#define MyAppVersion\s+"[^"]*"',
+        "#define MyAppVersion ""$Version""")
+    [System.IO.File]::WriteAllText($issFile, $issContent, $utf8NoBom)
+    Write-Host "Updated installer.iss MyAppVersion -> $Version"
+}
+
 $gameFiles = @("dantes_inferno.exe", "rexruntime.dll", "rexgpu-xenos.dll")
 foreach ($f in $gameFiles) {
     $src = Join-Path $GameBuildDir $f
@@ -37,10 +66,18 @@ Write-Host "Building C# solution..."
 & $msbuild (Join-Path $root "DantesInferno.sln") /p:Configuration=$Configuration /p:Platform=AnyCPU /v:minimal
 if ($LASTEXITCODE -ne 0) { throw "C# build failed." }
 
-$versionFile = Join-Path $root "DantesInfernoLauncher\bin\$Configuration\version.txt"
-if (-not (Test-Path $versionFile)) {
-    Write-Warning "version.txt not found in launcher bin - creating default."
-    Set-Content $versionFile "0.0.0" -Encoding UTF8
+$binVersionFile = Join-Path $root "DantesInfernoLauncher\bin\$Configuration\version.txt"
+if (Test-Path $binVersionFile) {
+    $binVersion = (Get-Content $binVersionFile -Raw).Trim()
+    if ($binVersion -ne $Version) {
+        Write-Warning "version.txt in bin output ($binVersion) does not match expected ($Version) — overwriting."
+        [System.IO.File]::WriteAllText($binVersionFile, $Version + "`r`n", $utf8NoBom)
+    } else {
+        Write-Host "version.txt in build output verified: $binVersion"
+    }
+} else {
+    Write-Warning "version.txt not found in launcher bin — creating with version $Version."
+    [System.IO.File]::WriteAllText($binVersionFile, $Version + "`r`n", $utf8NoBom)
 }
 
 if (Test-Path $OutputDir) { Remove-Item $OutputDir -Recurse -Force }
@@ -57,4 +94,5 @@ if (Test-Path $installerExe) {
     $size = (Get-Item $installerExe).Length
     $sizeMB = [math]::Round($size / 1048576, 2)
     Write-Host "Size: $sizeMB MB"
+    Write-Host "Version: $Version"
 }

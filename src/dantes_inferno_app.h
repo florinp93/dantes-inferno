@@ -14,7 +14,7 @@
 #include <array>
 #include <chrono>
 #include <cstring>
-#include <filesystem>
+#include <cstdlib>
 
 REXCVAR_DEFINE_DOUBLE(time_scalar, 1.0, "Gameplay",
                       "Guest time scaling factor (1.0 = normal, 50.0 = fast-forward)");
@@ -24,6 +24,10 @@ REXCVAR_DEFINE_BOOL(show_fps_overlay, false, "UI",
 
 REXCVAR_DEFINE_STRING(glyph_family, "auto", "UI",
                       "Button glyph family: auto, xbox, or playstation");
+
+REXCVAR_DEFINE_DOUBLE(ultrawide_target_aspect, 0.0, "Graphics",
+                      "Target aspect ratio for ultrawide (0=disabled, 1.7778=16:9, "
+                      "2.3889=21:9, 3.5556=32:9)");
 
 class FpsOverlayDialog : public rex::ui::ImGuiDialog {
  public:
@@ -171,10 +175,21 @@ class DantesInfernoApp : public rex::ReXApp {
     rex::cvar::SetFlagByName("keybind_dpad_right", "Shift+Right");
     rex::cvar::SetFlagByName("keybind_back", "Tab");
     rex::cvar::SetFlagByName("keybind_start", "Escape");
+
+    double target_aspect = REXCVAR_GET(ultrawide_target_aspect);
+    if (target_aspect > 0.0) {
+      rex::cvar::SetFlagByName("present_letterbox", "false");
+      g_ultrawide_target_aspect = static_cast<float>(target_aspect);
+      REXLOG_INFO("ULTRAWIDE: target_aspect={:.4f}, present_letterbox disabled",
+                  target_aspect);
+    } else {
+      REXLOG_INFO("ULTRAWIDE: disabled (target_aspect={:.4f})", target_aspect);
+    }
   }
 
   void OnPreLaunchModule() override {
     uint8_t* membase = runtime()->memory()->virtual_membase();
+
     auto* ptr = reinterpret_cast<uint32_t*>(membase + 0x82B101E4);
     *ptr = 0u;
   }
@@ -188,6 +203,22 @@ class DantesInfernoApp : public rex::ReXApp {
           if (scalar < 0.0) scalar = 0.0;
           rex::chrono::Clock::set_guest_time_scalar(scalar);
         });
+
+    rex::cvar::RegisterChangeCallback("ultrawide_target_aspect",
+        [](std::string_view, std::string_view new_value) {
+          double aspect = std::stod(std::string(new_value));
+          g_ultrawide_target_aspect = static_cast<float>(aspect);
+          if (aspect > 0.0) {
+            rex::cvar::SetFlagByName("present_letterbox", "false");
+          } else {
+            rex::cvar::SetFlagByName("present_letterbox", "true");
+          }
+        });
+
+    rex::ui::RegisterBind("bind_exit_game", "Alt+F4",
+                          "Exit game to desktop", [this] {
+      app_context().RequestDeferredQuit();
+    });
 
     if (REXCVAR_GET(show_fps_overlay) && imgui_drawer()) {
       auto* gfx_sys = runtime() ? runtime()->graphics_system() : nullptr;
@@ -224,7 +255,9 @@ class DantesInfernoApp : public rex::ReXApp {
   void OnShutdown() override {
     rex::ui::UnregisterBind("bind_fast_forward");
     rex::ui::UnregisterBind("bind_fps_overlay");
+    rex::ui::UnregisterBind("bind_exit_game");
     rex::cvar::UnregisterChangeCallbacks("time_scalar");
+    rex::cvar::UnregisterChangeCallbacks("ultrawide_target_aspect");
     fps_overlay_.reset();
     rex::chrono::Clock::set_guest_time_scalar(1.0);
     rex::cvar::SetFlagByName("vsync", "true");

@@ -114,6 +114,21 @@ namespace DantesInferno.Launcher
             if (scale > 3) scale = 3;
             ResScaleCombo.SelectedIndex = scale - 1;
 
+            var aspectOptions = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Native (16:9)", "native"),
+                new KeyValuePair<string, string>("21:9 (Ultrawide)", "2.3889"),
+                new KeyValuePair<string, string>("32:9 (Super Ultrawide)", "3.5556"),
+                new KeyValuePair<string, string>("16:10", "1.6"),
+                new KeyValuePair<string, string>("4:3", "1.3333"),
+            };
+            AspectRatioCombo.ItemsSource = aspectOptions;
+            AspectRatioCombo.DisplayMemberPath = "Key";
+            AspectRatioCombo.SelectedValuePath = "Value";
+            string cfgAspect = _config.AspectRatio ?? "native";
+            var matched = aspectOptions.FirstOrDefault(o => o.Value == cfgAspect);
+            AspectRatioCombo.SelectedIndex = matched.Equals(default(KeyValuePair<string, string>)) ? 0 : aspectOptions.IndexOf(matched);
+
             AAModeCombo.ItemsSource = new List<string> { "Off", "FXAA", "FXAA Extreme" };
             switch (_config.SwapPostEffect)
             {
@@ -170,6 +185,9 @@ namespace DantesInferno.Launcher
             int scaleIdx = ResScaleCombo.SelectedIndex;
             if (scaleIdx < 0) scaleIdx = 0;
             _config.ResolutionScale = scaleIdx + 1;
+
+            var aspectPair = AspectRatioCombo.SelectedItem as KeyValuePair<string, string>?;
+            _config.AspectRatio = aspectPair?.Value ?? "native";
 
             int aaIdx = AAModeCombo.SelectedIndex;
             switch (aaIdx)
@@ -247,6 +265,10 @@ namespace DantesInferno.Launcher
             args.Add("--video_mode_refresh_rate=60");
 
             args.Add("--input_backend=" + _config.InputBackend);
+
+            string aspect = _config.AspectRatio ?? "native";
+            if (!string.IsNullOrEmpty(aspect) && aspect != "native")
+                args.Add(string.Format("--ultrawide_target_aspect={0}", aspect));
 
             args.Add(loggingEnabled ? "--log_level=info" : "--log_level=off");
 
@@ -351,6 +373,7 @@ namespace DantesInferno.Launcher
         private void ApplyRecommended_Click(object sender, RoutedEventArgs e)
         {
             _config.ResolutionScale = 2;
+            _config.AspectRatio = "native";
             _config.SwapPostEffect = "fxaa";
             _config.AnisotropicOverride = -1;
             _config.VSync = true;

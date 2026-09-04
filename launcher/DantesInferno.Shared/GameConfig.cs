@@ -177,5 +177,11 @@ namespace DantesInferno
             get { return this["log_level"] ?? "off"; }
             set { this["log_level"] = value; }
         }
+
+        public string AspectRatio
+        {
+            get { return this["aspect_ratio"] ?? "native"; }
+            set { this["aspect_ratio"] = value; }
+        }
     }
 }

@@ -36,3 +36,17 @@ inline void FiberRestoreContext(PPCContext& ctx, uint8_t* base) {
   REXLOG_INFO("FIBER: restored r1=0x{:08X} r31=0x{:08X} r3={}",
               ctx.r1.u32, ctx.r31.u32, ctx.r3.s32);
 }
+
+inline float g_ultrawide_target_aspect = 0.0f;
+inline bool g_ultrawide_hook_logged = false;
+
+inline void UltrawideAspectHook(rex::ppc::Register& f29) {
+  if (g_ultrawide_target_aspect > 0.0f) {
+    if (!g_ultrawide_hook_logged) {
+      REXLOG_INFO("ULTRAWIDE: hook firing, setting aspect from {:.4f} to {:.4f}",
+                  f29.f32, g_ultrawide_target_aspect);
+      g_ultrawide_hook_logged = true;
+    }
+    f29.f32 = g_ultrawide_target_aspect;
+  }
+}

@@ -53,6 +53,7 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="180" />
@@ -62,13 +63,16 @@
                                     <Label Grid.Row="0" Grid.Column="0" Content="Resolution Scale:" />
                                     <ComboBox x:Name="ResScaleCombo" Grid.Row="0" Grid.Column="1" Margin="0,2" />
 
-                                    <Label Grid.Row="1" Grid.Column="0" Content="Anti-Aliasing:" />
-                                    <ComboBox x:Name="AAModeCombo" Grid.Row="1" Grid.Column="1" Margin="0,2" />
+                                    <Label Grid.Row="1" Grid.Column="0" Content="Aspect Ratio:" />
+                                    <ComboBox x:Name="AspectRatioCombo" Grid.Row="1" Grid.Column="1" Margin="0,2" ToolTip="Select your monitor's aspect ratio for correct Hor+ ultrawide rendering. Native = use the game's original 16:9." />
 
-                                    <Label Grid.Row="2" Grid.Column="0" Content="Texture Filtering:" />
-                                    <ComboBox x:Name="AnisoCombo" Grid.Row="2" Grid.Column="1" Margin="0,2" />
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Anti-Aliasing:" />
+                                    <ComboBox x:Name="AAModeCombo" Grid.Row="2" Grid.Column="1" Margin="0,2" />
 
-                                    <CheckBox x:Name="FullscreenCheck" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="Fullscreen" Margin="0,8,0,0" />
+                                    <Label Grid.Row="3" Grid.Column="0" Content="Texture Filtering:" />
+                                    <ComboBox x:Name="AnisoCombo" Grid.Row="3" Grid.Column="1" Margin="0,2" />
+
+                                    <CheckBox x:Name="FullscreenCheck" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="Fullscreen" Margin="0,8,0,0" />
                                 </Grid>
                             </GroupBox>
 

@@ -1,22 +1,4 @@
 #!/usr/bin/env python3
-"""
-apply_generated_patches.py
-
-Applies manual fiber/setjmp/longjmp edits to generated code after codegen.
-These edits are lost every time codegen is regenerated and must be re-applied.
-
-The ZeroFiberSwitchCallback() injection in sub_82701240 is automatic via
-the [[midasm_hook]] in the manifest and does NOT need manual re-application.
-
-Edits applied:
-  1. sub_82701240: add FiberSetjmp before li r3,0
-  2. sub_8267ACC8: add setjmp after sub_82701240 call
-  3. sub_82700CE0: replace blr with FiberLongjmp
-  4. sub_82678D78: add return after sub_82700CE0 call
-
-The functions may land in different .cpp files depending on the manifest's
-unresolved-function entries, so we search all generated files dynamically.
-"""
 
 import os
 import re
@@ -24,7 +6,6 @@ import sys
 import glob
 
 def find_file_containing(gen_dir, pattern):
-    """Find the first .cpp file in gen_dir containing the given regex pattern."""
     for filepath in sorted(glob.glob(os.path.join(gen_dir, 'dantes_inferno_recomp.*.cpp'))):
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -57,8 +38,6 @@ def main():
         print(f"ERROR: Generated directory not found: {gen_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # 1. sub_82701240 - add FiberSetjmp before li r3,0
-    # This function contains the ZeroFiberSwitchCallback() hook injection.
     filepath, content = find_file_containing(gen_dir, r'DEFINE_REX_FUNC\(sub_82701240\)')
     if filepath:
         content = apply_patch(filepath, content,
@@ -74,7 +53,6 @@ def main():
 	// li r3,0''',
             "sub_82701240: FiberSetjmp before return")
 
-    # 2. sub_8267ACC8 - add setjmp after sub_82701240 call
     filepath, content = find_file_containing(gen_dir, r'DEFINE_REX_FUNC\(sub_8267ACC8\)')
     if filepath:
         content = apply_patch(filepath, content,
@@ -91,7 +69,6 @@ def main():
 \g<2>''',
             "sub_8267ACC8: setjmp after sub_82701240")
 
-    # 3. sub_82700CE0 - replace blr with FiberLongjmp
     filepath, content = find_file_containing(gen_dir, r'DEFINE_REX_FUNC\(sub_82700CE0\)')
     if filepath:
         content = apply_patch(filepath, content,
@@ -102,7 +79,6 @@ def main():
 \g<2>''',
             "sub_82700CE0: FiberLongjmp instead of blr")
 
-    # 4. sub_82678D78 - add return after sub_82700CE0 call
     filepath, content = find_file_containing(gen_dir, r'DEFINE_REX_FUNC\(sub_82678D78\)')
     if filepath:
         content = apply_patch(filepath, content,

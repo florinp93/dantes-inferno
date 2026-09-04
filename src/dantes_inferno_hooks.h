@@ -41,7 +41,7 @@ inline float g_ultrawide_target_aspect = 0.0f;
 inline bool g_ultrawide_hook_logged = false;
 
 inline void UltrawideAspectHook(rex::ppc::Register& f29) {
-  if (g_ultrawide_target_aspect > 0.0f) {
+  if (g_ultrawide_target_aspect > 0.0f && f29.f32 > 0.1f && f29.f32 < 10.0f) {
     if (!g_ultrawide_hook_logged) {
       REXLOG_INFO("ULTRAWIDE: hook firing, setting aspect from {:.4f} to {:.4f}",
                   f29.f32, g_ultrawide_target_aspect);
